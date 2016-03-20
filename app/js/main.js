@@ -1,35 +1,36 @@
-var elText = document.getElementById('textjson');
-var elButton = document.getElementById('buttonjson');
-var elTown = document.getElementById('texttown');
+var elCheckCookie = document.getElementById('check-cookie');
+var elBodyCookies = document.getElementById('cookies-body');
 
-var towns = [];
+elCheckCookie.addEventListener('click', checkCookie);
 
-elButton.addEventListener('click', downloadJson);
-elTown.addEventListener('input', findTowns);
+function checkCookie(e) {
+	var cookiesList = document.cookie.split('; ');
 
-function downloadJson() {
-	var p = new Promise(function(resolve) {
-		var xhr = new XMLHttpRequest();
+	elBodyCookies.innerHTML = '';
 
-		xhr.open('POST', 'https://raw.githubusercontent.com/lapanoid/loftblog/master/cities.json', true);
-		xhr.onload = function() {	
-			resolve(xhr.response);
-		}
-		xhr.send();
-	}).then(function(value) {
-		towns = JSON.parse(value);
-		elText.value = 'Список успешно загружен';
-	})
+	for (var i = 0; i < cookiesList.length; i++) {
+		var childCookie = document.createElement('div'),
+			deleteBut = document.createElement('button'),
+			cookieText = document.createElement('span'),
+			cookieName = cookiesList[i].split('=')[0];
+
+		deleteBut.innerHTML = 'X';
+		deleteBut.setAttribute('data-cookie',cookieName);
+		cookieText.innerHTML = cookiesList[i];
+
+		deleteBut.addEventListener('click', deleteCookie);
+
+		childCookie.appendChild(deleteBut);
+		childCookie.appendChild(cookieText);
+		elBodyCookies.appendChild(childCookie);
+	}
 }
 
-function findTowns() {
-	elText.value = '';
-	for (var i = 0; i < towns.length; i++) {
-		var townName = towns[i].name,
-			inputText = elTown.value;
-			
-		if ( townName.indexOf(inputText) >= 0 ) {
-			elText.value = elText.value + '\n' + townName;
-		};
-	}
+function deleteCookie(e) {
+	var elItemCookie = e.srcElement.parentElement,
+		nameCookie = e.srcElement.getAttribute('data-cookie');
+		date = new Date(0);
+
+	elBodyCookies.removeChild(elItemCookie);
+	document.cookie = nameCookie + "=; path=/; expires=" + date.toUTCString();
 }
