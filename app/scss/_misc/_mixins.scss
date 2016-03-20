@@ -1,0 +1,10 @@
+@mixin get-sprite($map, $icon) {
+	$sprite-image: sprite-file($map, $icon);
+	$sprite-map: sprite-url($map);
+	$sprite-position: sprite-position($map, $icon);
+
+	background: $sprite-map $sprite-position no-repeat;
+
+	height: image-height($sprite-image);
+	width: image-width($sprite-image);
+}

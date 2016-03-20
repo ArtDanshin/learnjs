@@ -1,0 +1,9 @@
+{
+  "name": "SilverDragoon_Project",
+  "description": "Danshin_Artem_Project",
+  "dependencies": {
+    "jquery": "1.11.3",
+    "normalize-css": "normalize.css#~3.0.3",
+    "modernizr": "2.8.3"
+  }
+}

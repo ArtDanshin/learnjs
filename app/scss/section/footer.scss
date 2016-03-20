@@ -1,0 +1,24 @@
+.wrapper {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+#textjson {
+	position:absolute;
+	width: 200px;
+	height: 100px;
+	top: 50px;
+	left: 130px;
+}
+#buttonjson {
+	position:absolute;
+	top: 70px;
+	left: 20px;
+	width: 90px;
+}
+#texttown {
+	position:absolute;
+	top: 100px;
+	left: 20px;
+	width: 90px;
+}
