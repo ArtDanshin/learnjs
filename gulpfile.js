@@ -3,7 +3,8 @@
 var gulp 		= require('gulp'),
 	browserSync = require('browser-sync'),
 	jade        = require('gulp-jade'),
-	compass 	= require('gulp-compass');
+	stylus 		= require('gulp-stylus');
+	concat		= require('gulp-concat')
 
 /* -----  paths ----- */
 
@@ -11,25 +12,40 @@ var paths = {
 		jade : {
 			location	: 'app/markups/**/*.jade',
 			compiled	: 'app/markups/_pages/*.jade',
-			destination	: 'app'
+			destFolder	: 'dist/'
 		},
 
-		scss : {
-			location	: 'app/scss/**/*scss',
-			entryPoint	: 'app/css/main.css',
+		stylus : {
+			location	: 'app/stylus/main.styl',
+			destFolder	: 'dist/',
 		},
 
-		compass : {
-			configFile	: 'config.rb',
-			cssFolder	: 'app/css',
-			scssFolder	: 'app/scss',
-			imgFolder	: 'app/img'
+		fonts : {
+			location	: 'app/fonts/**/*',
+			destFolder	: 'dist/fonts/',
+		},
+
+		js : {
+			location	: 'app/js/**/*.js',
+			destFile	: 'app.js',
+			destFolder	: 'dist/',
+		},
+
+		libjs : {
+			location	: ['node_modules/jquery/dist/jquery.min.js'],
+			destFile	: 'libs.js',
+			destFolder	: 'dist/',
+		},
+
+		images : {
+			location	: 'app/img/**/*',
+			destFolder	: 'dist/img/',
 		},
 
 		browserSync : {
-			baseDir		: 'app',
-			watchPaths 	: ['app/*.html', 'app/css/*.css', 'app/js/*.js']
-		}
+			baseDir		: 'dist',
+			watchPaths 	: ['dist/*.html', 'dist/*.css', 'dist/*.js']
+		},
 }
 
 /* ----- Jade ----- */
@@ -39,20 +55,46 @@ gulp.task('jade', function() {
 		.pipe(jade({
 			pretty: '\t',
 		}))
-		.pipe(gulp.dest(paths.jade.destination))
+		.pipe(gulp.dest(paths.jade.destFolder))
 		.pipe(browserSync.stream());
 });
 
-/* ----- SCSS ----- */
+/* ----- Stylus ----- */
 
-gulp.task('compass', function() {
-	gulp.src(paths.scss.location)
-		.pipe(compass({
-			config_file: paths.compass.configFile,
-			css: paths.compass.cssFolder,
-			sass: paths.compass.scssFolder,
-			image: paths.compass.imgFolder
-		}));
+gulp.task('stylus', function() {
+	gulp.src(paths.stylus.location)
+		.pipe(stylus())
+		.pipe(gulp.dest(paths.stylus.destFolder));
+});
+
+/* ----- JS ----- */
+
+gulp.task('js', function() {
+	gulp.src(paths.js.location)
+		.pipe(concat(paths.js.destFile))
+		.pipe(gulp.dest(paths.js.destFolder));
+});
+
+/* ----- LibsJS ----- */
+
+gulp.task('libjs', function() {
+	gulp.src(paths.libjs.location)
+		.pipe(concat(paths.libjs.destFile))
+		.pipe(gulp.dest(paths.libjs.destFolder));
+});
+
+/* ----- Images ----- */
+
+gulp.task('images', function() {
+	gulp.src(paths.images.location)
+		.pipe(gulp.dest(paths.images.destFolder));
+});
+
+/* ----- Fonts ----- */
+
+gulp.task('fonts', function() {
+	gulp.src(paths.fonts.location)
+		.pipe(gulp.dest(paths.fonts.destFolder));
 });
 
 /* ----- Browser sync ----- */
@@ -71,10 +113,15 @@ gulp.task('sync', function() {
 
 gulp.task('watch', function(){
 	gulp.watch(paths.jade.location, ['jade']);
-	gulp.watch(paths.scss.location, ['compass']);
+	gulp.watch(paths.stylus.location, ['stylus']);
+	gulp.watch(paths.js.location, ['js']);
 	gulp.watch(paths.browserSync.watchPaths).on('change', browserSync.reload);
 });
 
 /* ----- Default ----- */
 
-gulp.task('default', ['jade', 'compass', 'sync', 'watch']);
+gulp.task('default', ['jade', 'stylus', 'js', 'libjs', 'fonts', 'images', 'sync', 'watch']);
+
+/* ----- Build Task -----*/
+
+gulp.task('build', ['jade', 'stylus', 'js', 'libjs', 'fonts', 'images']);

@@ -1,11 +1,15 @@
-Для запуска проекта необходим установленный Ruby и compass
-
 # Как установить
 
-1. git clone https://github.com/SilverDragoon/backbone-learn.git Backbone-Learn
+1. git clone https://github.com/SilverDragoon/learnjs.git
 2. cd !$
-3. bower i
-4. npm i
-5. gulp
+3. npm i
+
+# Для сброки проекта выполнить
+
+gulp build
+
+# Для разработки с LiveReload сервером
+
+gulp
 
 

@@ -1,14 +1,16 @@
 {
   "name": "SilverDragoon_Project",
   "version": "0.0.1",
-  "description": "dz2",
-  "repository": "https://github.com/SilverDragoon/LoftSchool_Shop",
+  "description": "LeardJS Project",
+  "repository": "https://github.com/SilverDragoon/learnjs",
   "author": "Artem Danshin",
   "devDependencies": {
-    "bower": "^1.6.3",
     "browser-sync": "^2.9.11",
     "gulp": "^3.9.0",
-    "gulp-compass": "^2.1.0",
-    "gulp-jade": "^1.1.0"
+    "gulp-concat": "^2.6.0",
+    "gulp-jade": "^1.1.0",
+    "gulp-stylus": "^2.3.1",
+    "jquery": "^2.2.2",
+    "normalize-css": "^2.3.1"
   }
 }
