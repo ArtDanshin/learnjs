@@ -16,7 +16,8 @@ var paths = {
 		},
 
 		stylus : {
-			location	: 'app/stylus/main.styl',
+			mainStylFile: 'app/stylus/main.styl',
+			location		: 'app/stylus/**/*.styl',
 			destFolder	: 'dist/',
 		},
 
@@ -62,7 +63,7 @@ gulp.task('jade', function() {
 /* ----- Stylus ----- */
 
 gulp.task('stylus', function() {
-	gulp.src(paths.stylus.location)
+	gulp.src(paths.stylus.mainStylFile)
 		.pipe(stylus())
 		.pipe(gulp.dest(paths.stylus.destFolder));
 });
