@@ -1,36 +1,37 @@
-var elCheckCookie = document.getElementById('check-cookie');
-var elBodyCookies = document.getElementById('cookies-body');
+var authButton = document.getElementsByClassName('save__button')[0],
+    closeButton= document.getElementsByClassName('close-app')[0];
 
-elCheckCookie.addEventListener('click', checkCookie);
 
-function checkCookie(e) {
-	var cookiesList = document.cookie.split('; ');
 
-	elBodyCookies.innerHTML = '';
+authButton.addEventListener('click', VkOperations)
 
-	for (var i = 0; i < cookiesList.length; i++) {
-		var childCookie = document.createElement('div'),
-			deleteBut = document.createElement('button'),
-			cookieText = document.createElement('span'),
-			cookieName = cookiesList[i].split('=')[0];
+closeButton.addEventListener('click', function() {
+  VK.Auth.logout(function() {
+    console.log('LogOut')
+  })
+})
 
-		deleteBut.innerHTML = 'X';
-		deleteBut.setAttribute('data-cookie',cookieName);
-		cookieText.innerHTML = cookiesList[i];
-
-		deleteBut.addEventListener('click', deleteCookie);
-
-		childCookie.appendChild(deleteBut);
-		childCookie.appendChild(cookieText);
-		elBodyCookies.appendChild(childCookie);
-	}
-}
-
-function deleteCookie(e) {
-	var elItemCookie = e.srcElement.parentElement,
-		nameCookie = e.srcElement.getAttribute('data-cookie');
-		date = new Date(0);
-
-	elBodyCookies.removeChild(elItemCookie);
-	document.cookie = nameCookie + "=; path=/; expires=" + date.toUTCString();
-}
+var VkOperations = new Promise(function(resolve, reject) {
+  console.log('Auth');
+  VK.init({
+    apiId: 5395665
+  });
+  // Авторизация
+  VK.Auth.login(function(response){
+    // Проверяем состояие авторизации
+    if(response.session) {
+      resolve(response)
+    } else {
+      reject(new Error('Авторизация не удалась'))
+    }
+  }, 2+4+8)
+}).then(function(){
+  return new Promise(function(resolve, reject) {
+    VK.api('users.get', {'name_case' : 'gen', 'fields': 'photo_200,bdate,city'}, function(response) {
+      console.log(response);
+    })
+    VK.api('friends.get', {'order' : 'random', 'fields' : 'photo_50'}, function(response) {
+      console.log(response)
+    })
+  })
+})
