@@ -28,8 +28,8 @@ var VkOperations = new Promise(function(resolve, reject) {
     VK.api('users.get', {'name_case' : 'gen', 'fields': 'photo_200,bdate,city'}, function(response) {
       console.log(response);
     })
+    // Получаем список друзей
     VK.api('friends.get', {'order' : 'random', 'fields' : 'photo_50'}, function(response) {
-      console.log(response.response);
       for (var i = 0; i < response.response.length; i++) {
         var el = response.response[i];
         document.getElementsByClassName('list__items')[0]
@@ -39,6 +39,8 @@ var VkOperations = new Promise(function(resolve, reject) {
   })
 })
 
+
+// Функция - шаблон. Вывод друга в список
 function itemList(firstName, lastName, photo) {
   var fullName = firstName + ' ' + lastName;
 
