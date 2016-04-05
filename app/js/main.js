@@ -1,7 +1,10 @@
-var authButton = document.getElementsByClassName('save__button')[0],
-    closeButton= document.getElementsByClassName('close-app')[0];
+var authButton      = document.getElementsByClassName('save__button')[0],
+    closeButton     = document.getElementsByClassName('close-app')[0],
+    searchInputMain = document.getElementsByClassName('search-panel__input')[0],
+    searchInputFinal= document.getElementsByClassName('search-panel__input')[1];
 
-authButton.addEventListener('click', itemList)
+var friends      = [],
+    frientsFinal = [];
 
 closeButton.addEventListener('click', function() {
   VK.Auth.logout(function() {
@@ -30,18 +33,22 @@ var VkOperations = new Promise(function(resolve, reject) {
     })
     // Получаем список друзей
     VK.api('friends.get', {'order' : 'random', 'fields' : 'photo_50'}, function(response) {
-      for (var i = 0; i < response.response.length; i++) {
-        var el = response.response[i];
-        document.getElementsByClassName('list__items')[0]
-                .appendChild(itemList(el.first_name,el.last_name,el.photo_50))
+      var list = document.getElementsByClassName('list__items')[0];
+          friends = response.response;
+      for (var i = 0; i < friends.length; i++) {
+        var el = friends[i];
+        list.appendChild(viewItemList(el.first_name,el.last_name,el.photo_50))
       }
+      searchInputMain.addEventListener('input', function() {
+        findFriends(searchInputMain,friends,list,viewItemList)
+      })
     })
   })
 })
 
 
 // Функция - шаблон. Вывод друга в список
-function itemList(firstName, lastName, photo) {
+function viewItemList(firstName, lastName, photo) {
   var fullName = firstName + ' ' + lastName;
 
   var list__item = document.createElement('div');
@@ -66,6 +73,7 @@ function itemList(firstName, lastName, photo) {
   return list__item;
 }
 
+// Функция вывода во второй список
 function moveItem(firstName,lastName,photo) {
   var fullName = firstName + ' ' + lastName,  
       list__items2 = document.getElementsByClassName('list__items')[1];
@@ -90,4 +98,20 @@ function moveItem(firstName,lastName,photo) {
   list__cross.addEventListener('click', function() {
     list__items2.removeChild(list__item);
   });
+}
+
+function findFriends(input,peoples,list,viewList) {
+  list.innerHTML = '';
+  for (var i = 0; i < peoples.length; i++) {
+    var fullName = peoples[i].first_name + ' ' + peoples[i].last_name,
+        inputText = input.value;
+      
+    if ( fullName.indexOf(inputText) >= 0 ) {
+      list.appendChild(viewList(peoples[i].first_name,peoples[i].last_name,peoples[i].photo_50))
+    };
+  }
+}
+
+if (document.readyState === 'complete') {
+
 }
