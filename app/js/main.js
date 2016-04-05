@@ -59,5 +59,35 @@ function itemList(firstName, lastName, photo) {
   list__item.appendChild(list__name);
   list__item.appendChild(list__plus);
 
+  list__plus.addEventListener('click', function() {
+    moveItem(firstName,lastName,photo);
+  });
+
   return list__item;
+}
+
+function moveItem(firstName,lastName,photo) {
+  var fullName = firstName + ' ' + lastName,  
+      list__items2 = document.getElementsByClassName('list__items')[1];
+
+  var list__item = document.createElement('div');
+      list__item.className = 'list__item';
+  var list__avatar = document.createElement('img');
+      list__avatar.className = 'list__avatar';
+      list__avatar.setAttribute('src', photo);
+  var list__name = document.createElement('div');
+      list__name.className = 'list__name';
+      list__name.innerHTML = fullName;
+  var list__cross = document.createElement('div');
+      list__cross.className = 'list__cross'; 
+
+  list__item.appendChild(list__avatar);
+  list__item.appendChild(list__name);
+  list__item.appendChild(list__cross);
+
+  list__items2.appendChild(list__item);
+
+  list__cross.addEventListener('click', function() {
+    list__items2.removeChild(list__item);
+  });
 }
