@@ -7,6 +7,19 @@ var authButton      = document.getElementsByClassName('save__button')[0],
 var friends      = [],
     friendsFinal = [];
 
+document.addEventListener('DOMContentLoaded',initializeFriend)
+
+authButton.addEventListener('click', function() {
+  localStorage.setItem("friends", JSON.stringify(friendsFinal));
+})
+
+closeButton.addEventListener('click', function() {
+  VK.Auth.logout(function() {
+    console.log('LogOut')
+  })
+  localStorage.removeItem('friends');
+})
+
 list2.addEventListener('dragover', function(e) {
   e.preventDefault();
 })
@@ -17,16 +30,6 @@ list2.addEventListener('drop', function(e) {
   e.preventDefault();
   list2.insertAdjacentHTML('beforeend', data.html)
   addDataList(data.first_name,data.last_name,data.photo_50,data.uid,friendsFinal);
-})
-
-authButton.addEventListener('click', function() {
-  localStorage.setItem("friends", JSON.stringify(friendsFinal));
-})
-
-closeButton.addEventListener('click', function() {
-  VK.Auth.logout(function() {
-    console.log('LogOut')
-  })
 })
 
 var VkOperations = new Promise(function(resolve, reject) {
@@ -169,6 +172,3 @@ function initializeFriend() {
     }
   }
 }
-
-
-document.addEventListener('DOMContentLoaded',initializeFriend)
