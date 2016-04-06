@@ -1,10 +1,22 @@
 var authButton      = document.getElementsByClassName('save__button')[0],
     closeButton     = document.getElementsByClassName('close-app')[0],
     searchInputMain = document.getElementsByClassName('search-panel__input')[0],
-    searchInputFinal= document.getElementsByClassName('search-panel__input')[1];
+    searchInputFinal= document.getElementsByClassName('search-panel__input')[1],
+    list2           = document.getElementsByClassName('list__items')[1];
 
 var friends      = [],
     frientsFinal = [];
+
+list2.addEventListener('dragover', function(e) {
+  e.preventDefault();
+})
+
+list2.addEventListener('drop', function(e) {
+  var data = JSON.parse(e.dataTransfer.getData('text'));
+  e.stopPropagation();
+  e.preventDefault();
+  list2.insertAdjacentHTML('beforeend', data.html)
+})
 
 closeButton.addEventListener('click', function() {
   VK.Auth.logout(function() {
@@ -37,7 +49,7 @@ var VkOperations = new Promise(function(resolve, reject) {
           friends = response.response;
       for (var i = 0; i < friends.length; i++) {
         var el = friends[i];
-        list.appendChild(viewItemList(el.first_name,el.last_name,el.photo_50))
+        list.appendChild(viewItemList(el.first_name,el.last_name,el.photo_50,el.uid))
       }
       searchInputMain.addEventListener('input', function() {
         findFriends(searchInputMain,friends,list,viewItemList)
@@ -48,11 +60,12 @@ var VkOperations = new Promise(function(resolve, reject) {
 
 
 // Функция - шаблон. Вывод друга в список
-function viewItemList(firstName, lastName, photo) {
+function viewItemList(firstName, lastName, photo, uid) {
   var fullName = firstName + ' ' + lastName;
 
   var list__item = document.createElement('div');
       list__item.className = 'list__item';
+      list__item.setAttribute('draggable', true);
   var list__avatar = document.createElement('img');
       list__avatar.className = 'list__avatar';
       list__avatar.setAttribute('src', photo);
@@ -68,6 +81,17 @@ function viewItemList(firstName, lastName, photo) {
 
   list__plus.addEventListener('click', function() {
     moveItem(firstName,lastName,photo);
+  });
+
+  list__item.addEventListener('dragstart', function(e) {
+    var data = { 
+      first_name : firstName,
+      last_name  : lastName,
+      photo_50   : photo,
+      uid        : uid,
+      html       : list__item.outerHTML
+    }
+    e.dataTransfer.setData('text', JSON.stringify(data));
   });
 
   return list__item;
