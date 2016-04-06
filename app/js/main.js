@@ -19,6 +19,10 @@ list2.addEventListener('drop', function(e) {
   addDataList(data.first_name,data.last_name,data.photo_50,data.uid,friendsFinal);
 })
 
+authButton.addEventListener('click', function() {
+  localStorage.setItem("friends", JSON.stringify(friendsFinal));
+})
+
 closeButton.addEventListener('click', function() {
   VK.Auth.logout(function() {
     console.log('LogOut')
@@ -156,6 +160,15 @@ function removeDataList(uid, friendsList) {
   })
 }
 
-if (document.readyState === 'complete') {
-
+function initializeFriend() {
+  if ( localStorage.getItem('friends')) {
+    friendsFinal = JSON.parse(localStorage.getItem('friends'));
+    for (var i = 0; i < friendsFinal.length; i++) {
+      var el = friendsFinal[i];
+      moveItem(el.first_name,el.last_name,el.photo_50,el.uid)
+    }
+  }
 }
+
+
+document.addEventListener('DOMContentLoaded',initializeFriend)
