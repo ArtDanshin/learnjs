@@ -88,7 +88,7 @@ function viewItemList(firstName, lastName, photo, uid) {
   list__item.appendChild(list__plus);
 
   list__plus.addEventListener('click', function() {
-    moveItem(firstName,lastName,photo,uid);
+    list2.appendChild(viewMovedItem(firstName,lastName,photo,uid));
     addDataList(firstName,lastName,photo,uid,friendsFinal);
   });
 
@@ -107,7 +107,7 @@ function viewItemList(firstName, lastName, photo, uid) {
 }
 
 // Функция вывода во второй список
-function moveItem(firstName,lastName,photo,uid) {
+function viewMovedItem(firstName,lastName,photo,uid) {
   var fullName = firstName + ' ' + lastName,  
       list__items2 = document.getElementsByClassName('list__items')[1];
 
@@ -126,12 +126,12 @@ function moveItem(firstName,lastName,photo,uid) {
   list__item.appendChild(list__name);
   list__item.appendChild(list__cross);
 
-  list__items2.appendChild(list__item);
-
   list__cross.addEventListener('click', function() {
     list__items2.removeChild(list__item);
     friendsFinal = removeDataList(uid,friendsFinal);
   });
+
+  return list__item;
 }
 
 function findFriends(input,peoples,list,viewList) {
@@ -168,7 +168,10 @@ function initializeFriend() {
     friendsFinal = JSON.parse(localStorage.getItem('friends'));
     for (var i = 0; i < friendsFinal.length; i++) {
       var el = friendsFinal[i];
-      moveItem(el.first_name,el.last_name,el.photo_50,el.uid)
+      list2.appendChild(viewMovedItem(firstName,lastName,photo,uid));
     }
   }
+  searchInputFinal.addEventListener('input', function() {
+    findFriends(searchInputFinal,friendsFinal,list2,viewMovedItem);
+  })
 }
