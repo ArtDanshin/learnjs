@@ -5,7 +5,7 @@ var authButton      = document.getElementsByClassName('save__button')[0],
     list2           = document.getElementsByClassName('list__items')[1];
 
 var friends      = [],
-    frientsFinal = [];
+    friendsFinal = [];
 
 list2.addEventListener('dragover', function(e) {
   e.preventDefault();
@@ -16,6 +16,7 @@ list2.addEventListener('drop', function(e) {
   e.stopPropagation();
   e.preventDefault();
   list2.insertAdjacentHTML('beforeend', data.html)
+  addDataList(data.first_name,data.last_name,data.photo_50,data.uid,friendsFinal);
 })
 
 closeButton.addEventListener('click', function() {
@@ -80,7 +81,8 @@ function viewItemList(firstName, lastName, photo, uid) {
   list__item.appendChild(list__plus);
 
   list__plus.addEventListener('click', function() {
-    moveItem(firstName,lastName,photo);
+    moveItem(firstName,lastName,photo,uid);
+    addDataList(firstName,lastName,photo,uid,friendsFinal);
   });
 
   list__item.addEventListener('dragstart', function(e) {
@@ -98,7 +100,7 @@ function viewItemList(firstName, lastName, photo, uid) {
 }
 
 // Функция вывода во второй список
-function moveItem(firstName,lastName,photo) {
+function moveItem(firstName,lastName,photo,uid) {
   var fullName = firstName + ' ' + lastName,  
       list__items2 = document.getElementsByClassName('list__items')[1];
 
@@ -121,6 +123,7 @@ function moveItem(firstName,lastName,photo) {
 
   list__cross.addEventListener('click', function() {
     list__items2.removeChild(list__item);
+    friendsFinal = removeDataList(uid,friendsFinal);
   });
 }
 
@@ -134,6 +137,23 @@ function findFriends(input,peoples,list,viewList) {
       list.appendChild(viewList(peoples[i].first_name,peoples[i].last_name,peoples[i].photo_50))
     };
   }
+}
+
+function addDataList(firstName, lastName, photo, uid, friendsList) {
+  var data = { 
+      first_name : firstName,
+      last_name  : lastName,
+      photo_50   : photo,
+      uid        : uid
+    }
+
+  friendsList[friendsList.length] = data;
+}
+
+function removeDataList(uid, friendsList) {
+  return friendsList.filter(function(friend) {
+    if (friend.uid !== uid) return true
+  })
 }
 
 if (document.readyState === 'complete') {
