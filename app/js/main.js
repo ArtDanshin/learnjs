@@ -1,4 +1,4 @@
-var authButton      = document.getElementsByClassName('save__button')[0],
+var saveButton      = document.getElementsByClassName('save__button')[0],
     closeButton     = document.getElementsByClassName('close-app')[0],
     searchInputMain = document.getElementsByClassName('search-panel__input')[0],
     searchInputFinal= document.getElementsByClassName('search-panel__input')[1],
@@ -9,7 +9,7 @@ var friends      = [],
 
 document.addEventListener('DOMContentLoaded',initializeFriend)
 
-authButton.addEventListener('click', function() {
+saveButton.addEventListener('click', function() {
   localStorage.setItem("friends", JSON.stringify(friendsFinal));
 })
 
@@ -28,12 +28,11 @@ list2.addEventListener('drop', function(e) {
   var data = JSON.parse(e.dataTransfer.getData('text'));
   e.stopPropagation();
   e.preventDefault();
-  list2.insertAdjacentHTML('beforeend', data.html)
-  addDataList(data.first_name,data.last_name,data.photo_50,data.uid,friendsFinal);
+  list2.appendChild(viewMovedItem(data))
+  addDataList(data,friendsFinal);
 })
 
 var VkOperations = new Promise(function(resolve, reject) {
-  console.log('Auth');
   VK.init({
     apiId: 5395665
   });
@@ -48,16 +47,14 @@ var VkOperations = new Promise(function(resolve, reject) {
   }, 2+4+8)
 }).then(function(){
   return new Promise(function(resolve, reject) {
-    VK.api('users.get', {'name_case' : 'gen', 'fields': 'photo_200,bdate,city'}, function(response) {
-      console.log(response);
-    })
     // Получаем список друзей
     VK.api('friends.get', {'order' : 'random', 'fields' : 'photo_50'}, function(response) {
       var list = document.getElementsByClassName('list__items')[0];
           friends = response.response;
       for (var i = 0; i < friends.length; i++) {
-        var el = friends[i];
-        list.appendChild(viewItemList(el.first_name,el.last_name,el.photo_50,el.uid))
+        var el   = friends[i],
+            data = new formData(el.first_name,el.last_name,el.photo_50,el.uid);
+        list.appendChild(viewItemList(data));
       }
       searchInputMain.addEventListener('input', function() {
         findFriends(searchInputMain,friends,list,viewItemList)
@@ -68,15 +65,15 @@ var VkOperations = new Promise(function(resolve, reject) {
 
 
 // Функция - шаблон. Вывод друга в список
-function viewItemList(firstName, lastName, photo, uid) {
-  var fullName = firstName + ' ' + lastName;
+function viewItemList(data) {
+  var fullName = data.first_name + ' ' + data.last_name;
 
   var list__item = document.createElement('div');
       list__item.className = 'list__item';
       list__item.setAttribute('draggable', true);
   var list__avatar = document.createElement('img');
       list__avatar.className = 'list__avatar';
-      list__avatar.setAttribute('src', photo);
+      list__avatar.setAttribute('src', data.photo_50);
   var list__name = document.createElement('div');
       list__name.className = 'list__name';
       list__name.innerHTML = fullName;
@@ -88,18 +85,11 @@ function viewItemList(firstName, lastName, photo, uid) {
   list__item.appendChild(list__plus);
 
   list__plus.addEventListener('click', function() {
-    list2.appendChild(viewMovedItem(firstName,lastName,photo,uid));
-    addDataList(firstName,lastName,photo,uid,friendsFinal);
+    list2.appendChild(viewMovedItem(data));
+    addDataList(data,friendsFinal);
   });
 
   list__item.addEventListener('dragstart', function(e) {
-    var data = { 
-      first_name : firstName,
-      last_name  : lastName,
-      photo_50   : photo,
-      uid        : uid,
-      html       : list__item.outerHTML
-    }
     e.dataTransfer.setData('text', JSON.stringify(data));
   });
 
@@ -107,15 +97,15 @@ function viewItemList(firstName, lastName, photo, uid) {
 }
 
 // Функция вывода во второй список
-function viewMovedItem(firstName,lastName,photo,uid) {
-  var fullName = firstName + ' ' + lastName,  
+function viewMovedItem(data) {
+  var fullName = data.first_name + ' ' + data.last_name,  
       list__items2 = document.getElementsByClassName('list__items')[1];
 
   var list__item = document.createElement('div');
       list__item.className = 'list__item';
   var list__avatar = document.createElement('img');
       list__avatar.className = 'list__avatar';
-      list__avatar.setAttribute('src', photo);
+      list__avatar.setAttribute('src', data.photo_50);
   var list__name = document.createElement('div');
       list__name.className = 'list__name';
       list__name.innerHTML = fullName;
@@ -128,7 +118,7 @@ function viewMovedItem(firstName,lastName,photo,uid) {
 
   list__cross.addEventListener('click', function() {
     list__items2.removeChild(list__item);
-    friendsFinal = removeDataList(uid,friendsFinal);
+    friendsFinal = removeDataList(data.uid,friendsFinal);
   });
 
   return list__item;
@@ -141,19 +131,19 @@ function findFriends(input,peoples,list,viewList) {
         inputText = input.value;
       
     if ( fullName.indexOf(inputText) >= 0 ) {
-      list.appendChild(viewList(peoples[i].first_name,peoples[i].last_name,peoples[i].photo_50))
+      list.appendChild(viewList(peoples[i]))
     };
   }
 }
 
-function addDataList(firstName, lastName, photo, uid, friendsList) {
-  var data = { 
-      first_name : firstName,
-      last_name  : lastName,
-      photo_50   : photo,
-      uid        : uid
-    }
+function formData(firstName, lastName, photo, uid) {
+  this.first_name = firstName;
+  this.last_name  = lastName;
+  this.photo_50   = photo;
+  this.uid        = uid;
+}
 
+function addDataList(data,friendsList) {
   friendsList[friendsList.length] = data;
 }
 
@@ -168,7 +158,7 @@ function initializeFriend() {
     friendsFinal = JSON.parse(localStorage.getItem('friends'));
     for (var i = 0; i < friendsFinal.length; i++) {
       var el = friendsFinal[i];
-      list2.appendChild(viewMovedItem(firstName,lastName,photo,uid));
+      list2.appendChild(viewMovedItem(friendsFinal[i]));
     }
   }
   searchInputFinal.addEventListener('input', function() {
