@@ -2,6 +2,7 @@ var saveButton      = document.getElementsByClassName('save__button')[0],
     closeButton     = document.getElementsByClassName('close-app')[0],
     searchInputMain = document.getElementsByClassName('search-panel__input')[0],
     searchInputFinal= document.getElementsByClassName('search-panel__input')[1],
+    list1           = document.getElementsByClassName('list__items')[0];
     list2           = document.getElementsByClassName('list__items')[1];
 
 var friends      = [],
@@ -18,6 +19,8 @@ closeButton.addEventListener('click', function() {
     console.log('LogOut')
   })
   localStorage.removeItem('friends');
+  list1.innerHTML = '';
+  list2.innerHTML = '';
 })
 
 list2.addEventListener('dragover', function(e) {
@@ -28,7 +31,7 @@ list2.addEventListener('drop', function(e) {
   var data = JSON.parse(e.dataTransfer.getData('text'));
   e.stopPropagation();
   e.preventDefault();
-  list2.appendChild(viewMovedItem(data))
+  list2.appendChild(viewMovedItem(data,list2))
   addDataList(data,friendsFinal);
 })
 
@@ -47,17 +50,18 @@ var VkOperations = new Promise(function(resolve, reject) {
   }, 2+4+8)
 }).then(function(){
   return new Promise(function(resolve, reject) {
-    // Получаем список друзей
+    // Получаем список друзей в случайном порядке с фоткой 50x50
     VK.api('friends.get', {'order' : 'random', 'fields' : 'photo_50'}, function(response) {
-      var list = document.getElementsByClassName('list__items')[0];
-          friends = response.response;
+      var friends = response.response;
+      // Выводим полученные данные в лист
       for (var i = 0; i < friends.length; i++) {
         var el   = friends[i],
             data = new formData(el.first_name,el.last_name,el.photo_50,el.uid);
-        list.appendChild(viewItemList(data));
+        list1.appendChild(viewItemList(data));
       }
+      // Активируем поиск
       searchInputMain.addEventListener('input', function() {
-        findFriends(searchInputMain,friends,list,viewItemList)
+        findFriends(searchInputMain,friends,list1,viewItemList)
       })
     })
   })
@@ -68,6 +72,7 @@ var VkOperations = new Promise(function(resolve, reject) {
 function viewItemList(data) {
   var fullName = data.first_name + ' ' + data.last_name;
 
+  // Создаем все блоки с данными
   var list__item = document.createElement('div');
       list__item.className = 'list__item';
       list__item.setAttribute('draggable', true);
@@ -84,11 +89,13 @@ function viewItemList(data) {
   list__item.appendChild(list__name);
   list__item.appendChild(list__plus);
 
+  // Обработка добавления в финальный список по нажатию на кнопку
   list__plus.addEventListener('click', function() {
-    list2.appendChild(viewMovedItem(data));
+    list2.appendChild(viewMovedItem(data,list2));
     addDataList(data,friendsFinal);
   });
 
+  // Обработка добавления в финальный список перетаскиванием
   list__item.addEventListener('dragstart', function(e) {
     e.dataTransfer.setData('text', JSON.stringify(data));
   });
@@ -97,10 +104,10 @@ function viewItemList(data) {
 }
 
 // Функция вывода во второй список
-function viewMovedItem(data) {
-  var fullName = data.first_name + ' ' + data.last_name,  
-      list__items2 = document.getElementsByClassName('list__items')[1];
+function viewMovedItem(data,list) {
+  var fullName = data.first_name + ' ' + data.last_name;
 
+  // Создаем все блоки с данными
   var list__item = document.createElement('div');
       list__item.className = 'list__item';
   var list__avatar = document.createElement('img');
@@ -116,14 +123,16 @@ function viewMovedItem(data) {
   list__item.appendChild(list__name);
   list__item.appendChild(list__cross);
 
+  // Обработка удаления по клику по крестику
   list__cross.addEventListener('click', function() {
-    list__items2.removeChild(list__item);
+    list.removeChild(list__item);
     friendsFinal = removeDataList(data.uid,friendsFinal);
   });
 
   return list__item;
 }
 
+// Функция поиска в массиве peoples и вывод в нужный list
 function findFriends(input,peoples,list,viewList) {
   list.innerHTML = '';
   for (var i = 0; i < peoples.length; i++) {
@@ -136,6 +145,7 @@ function findFriends(input,peoples,list,viewList) {
   }
 }
 
+// Формирование объекта с параметрами друга
 function formData(firstName, lastName, photo, uid) {
   this.first_name = firstName;
   this.last_name  = lastName;
@@ -143,24 +153,28 @@ function formData(firstName, lastName, photo, uid) {
   this.uid        = uid;
 }
 
+// Добавление друга в массив друзей
 function addDataList(data,friendsList) {
   friendsList[friendsList.length] = data;
 }
 
+// Удаление друга из массива друзей
 function removeDataList(uid, friendsList) {
   return friendsList.filter(function(friend) {
     if (friend.uid !== uid) return true
   })
 }
 
+// Загрузка друзей из locacStorage в список
 function initializeFriend() {
   if ( localStorage.getItem('friends')) {
     friendsFinal = JSON.parse(localStorage.getItem('friends'));
     for (var i = 0; i < friendsFinal.length; i++) {
       var el = friendsFinal[i];
-      list2.appendChild(viewMovedItem(friendsFinal[i]));
+      list2.appendChild(viewMovedItem(friendsFinal[i],list2));
     }
   }
+  // Включаем поиск по людям во втором поле
   searchInputFinal.addEventListener('input', function() {
     findFriends(searchInputFinal,friendsFinal,list2,viewMovedItem);
   })
