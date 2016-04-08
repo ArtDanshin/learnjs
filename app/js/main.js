@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded',initializeFriend)
 
 saveButton.addEventListener('click', function() {
   localStorage.setItem("friends", JSON.stringify(friendsFinal));
+  alert('Список друзей сохранен');
 })
 
 closeButton.addEventListener('click', function() {
@@ -21,6 +22,7 @@ closeButton.addEventListener('click', function() {
   localStorage.removeItem('friends');
   list1.innerHTML = '';
   list2.innerHTML = '';
+  alert('Ваши данные удалены из приложения');
 })
 
 list2.addEventListener('dragover', function(e) {
@@ -31,7 +33,7 @@ list2.addEventListener('drop', function(e) {
   var data = JSON.parse(e.dataTransfer.getData('text'));
   e.stopPropagation();
   e.preventDefault();
-  list2.appendChild(viewMovedItem(data,list2))
+  list2.appendChild(viewMovedItem(data,list2,list1));
   addDataList(data,friendsFinal);
 })
 
@@ -52,12 +54,13 @@ var VkOperations = new Promise(function(resolve, reject) {
   return new Promise(function(resolve, reject) {
     // Получаем список друзей в случайном порядке с фоткой 50x50
     VK.api('friends.get', {'order' : 'random', 'fields' : 'photo_50'}, function(response) {
-      var friends = response.response;
+      var friendsVk = response.response;
       // Выводим полученные данные в лист
-      for (var i = 0; i < friends.length; i++) {
-        var el   = friends[i],
+      for (var i = 0; i < friendsVk.length; i++) {
+        var el   = friendsVk[i],
             data = new formData(el.first_name,el.last_name,el.photo_50,el.uid);
-        list1.appendChild(viewItemList(data));
+        addDataList(data,friends);
+        list1.appendChild(viewItemList(data,list1,list2));
       }
       // Активируем поиск
       searchInputMain.addEventListener('input', function() {
@@ -69,7 +72,7 @@ var VkOperations = new Promise(function(resolve, reject) {
 
 
 // Функция - шаблон. Вывод друга в список
-function viewItemList(data) {
+function viewItemList(data,listOut,listTo) {
   var fullName = data.first_name + ' ' + data.last_name;
 
   // Создаем все блоки с данными
@@ -91,8 +94,10 @@ function viewItemList(data) {
 
   // Обработка добавления в финальный список по нажатию на кнопку
   list__plus.addEventListener('click', function() {
-    list2.appendChild(viewMovedItem(data,list2));
+    listTo.appendChild(viewMovedItem(data,listTo,listOut));
     addDataList(data,friendsFinal);
+    listOut.removeChild(list__item);
+    friends = removeDataList(data.uid,friends);
   });
 
   // Обработка добавления в финальный список перетаскиванием
@@ -104,7 +109,7 @@ function viewItemList(data) {
 }
 
 // Функция вывода во второй список
-function viewMovedItem(data,list) {
+function viewMovedItem(data,listOut,listTo) {
   var fullName = data.first_name + ' ' + data.last_name;
 
   // Создаем все блоки с данными
@@ -125,8 +130,10 @@ function viewMovedItem(data,list) {
 
   // Обработка удаления по клику по крестику
   list__cross.addEventListener('click', function() {
-    list.removeChild(list__item);
+    listOut.removeChild(list__item);
     friendsFinal = removeDataList(data.uid,friendsFinal);
+    listTo.appendChild(viewMovedItem(data,listTo,listOut));
+    addDataList(data,friends);
   });
 
   return list__item;
@@ -171,7 +178,7 @@ function initializeFriend() {
     friendsFinal = JSON.parse(localStorage.getItem('friends'));
     for (var i = 0; i < friendsFinal.length; i++) {
       var el = friendsFinal[i];
-      list2.appendChild(viewMovedItem(friendsFinal[i],list2));
+      list2.appendChild(viewMovedItem(friendsFinal[i],list2,list1));
     }
   }
   // Включаем поиск по людям во втором поле
