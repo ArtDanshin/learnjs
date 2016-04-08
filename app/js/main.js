@@ -33,8 +33,18 @@ list2.addEventListener('drop', function(e) {
   var data = JSON.parse(e.dataTransfer.getData('text'));
   e.stopPropagation();
   e.preventDefault();
-  list2.appendChild(viewMovedItem(data,list2,list1));
+  list2.appendChild(viewItemList(data,list2,list1,friendsFinal,friends,'delete'));
   addDataList(data,friendsFinal);
+})
+
+// Активируем в первом поле поиска по людям вк
+searchInputMain.addEventListener('input', function() {
+  findFriends(searchInputMain,friends,friendsFinal,list1,list2,viewItemList,'add')
+})
+
+// Активируем в втором поле поиска по local людям
+searchInputFinal.addEventListener('input', function() {
+  findFriends(searchInputFinal,friendsFinal,friends,list2,list1,viewItemList,'delete');
 })
 
 var VkOperations = new Promise(function(resolve, reject) {
@@ -60,19 +70,15 @@ var VkOperations = new Promise(function(resolve, reject) {
         var el   = friendsVk[i],
             data = new formData(el.first_name,el.last_name,el.photo_50,el.uid);
         addDataList(data,friends);
-        list1.appendChild(viewItemList(data,list1,list2));
+        list1.appendChild(viewItemList(data,list1,list2,friends,friendsFinal,'add'));
       }
-      // Активируем поиск
-      searchInputMain.addEventListener('input', function() {
-        findFriends(searchInputMain,friends,list1,viewItemList)
-      })
     })
   })
 })
 
 
 // Функция - шаблон. Вывод друга в список
-function viewItemList(data,listOut,listTo) {
+function viewItemList(data,listOut,listTo,friendsOut,friendsTo,type) {
   var fullName = data.first_name + ' ' + data.last_name;
 
   // Создаем все блоки с данными
@@ -85,69 +91,51 @@ function viewItemList(data,listOut,listTo) {
   var list__name = document.createElement('div');
       list__name.className = 'list__name';
       list__name.innerHTML = fullName;
-  var list__plus = document.createElement('div');
-      list__plus.className = 'list__plus';
+  var list__control = document.createElement('div');
+
+  if (type === 'add') {
+    type = 'delete';
+    list__control.className = 'list__plus';
+
+    list__item.addEventListener('dragstart', function(e) {
+      e.dataTransfer.setData('text', JSON.stringify(data));
+    });
+  } else if (type === 'delete'){
+    type = 'add';
+    list__control.className = 'list__cross';
+
+    list__item.addEventListener('dragend', function(e) {
+      listTo.appendChild(viewItemList(data,listTo,listOut,friendsTo,friendsOut,type));
+      addDataList(data,friendsTo);
+      listOut.removeChild(list__item);
+      friendsOut = removeDataList(data.uid,friendsOut);
+    });
+  }
 
   list__item.appendChild(list__avatar);
   list__item.appendChild(list__name);
-  list__item.appendChild(list__plus);
+  list__item.appendChild(list__control);
 
   // Обработка добавления в финальный список по нажатию на кнопку
-  list__plus.addEventListener('click', function() {
-    listTo.appendChild(viewMovedItem(data,listTo,listOut));
-    addDataList(data,friendsFinal);
+  list__control.addEventListener('click', function() {
+    listTo.appendChild(viewItemList(data,listTo,listOut,friendsTo,friendsOut,type));
+    addDataList(data,friendsTo);
     listOut.removeChild(list__item);
-    friends = removeDataList(data.uid,friends);
-  });
-
-  // Обработка добавления в финальный список перетаскиванием
-  list__item.addEventListener('dragstart', function(e) {
-    e.dataTransfer.setData('text', JSON.stringify(data));
-  });
-
-  return list__item;
-}
-
-// Функция вывода во второй список
-function viewMovedItem(data,listOut,listTo) {
-  var fullName = data.first_name + ' ' + data.last_name;
-
-  // Создаем все блоки с данными
-  var list__item = document.createElement('div');
-      list__item.className = 'list__item';
-  var list__avatar = document.createElement('img');
-      list__avatar.className = 'list__avatar';
-      list__avatar.setAttribute('src', data.photo_50);
-  var list__name = document.createElement('div');
-      list__name.className = 'list__name';
-      list__name.innerHTML = fullName;
-  var list__cross = document.createElement('div');
-      list__cross.className = 'list__cross'; 
-
-  list__item.appendChild(list__avatar);
-  list__item.appendChild(list__name);
-  list__item.appendChild(list__cross);
-
-  // Обработка удаления по клику по крестику
-  list__cross.addEventListener('click', function() {
-    listOut.removeChild(list__item);
-    friendsFinal = removeDataList(data.uid,friendsFinal);
-    listTo.appendChild(viewMovedItem(data,listTo,listOut));
-    addDataList(data,friends);
+    friendsOut = removeDataList(data.uid,friendsOut);
   });
 
   return list__item;
 }
 
 // Функция поиска в массиве peoples и вывод в нужный list
-function findFriends(input,peoples,list,viewList) {
-  list.innerHTML = '';
-  for (var i = 0; i < peoples.length; i++) {
-    var fullName = peoples[i].first_name + ' ' + peoples[i].last_name,
+function findFriends(input,friendsOut,friendsTo,listOut,listTo,viewList,type) {
+  listOut.innerHTML = '';
+  for (var i = 0; i < friendsOut.length; i++) {
+    var fullName = friendsOut[i].first_name + ' ' + friendsOut[i].last_name,
         inputText = input.value;
       
     if ( fullName.indexOf(inputText) >= 0 ) {
-      list.appendChild(viewList(peoples[i]))
+      listOut.appendChild(viewList(friendsOut[i],listOut,listTo,friendsOut,friendsTo,type))
     };
   }
 }
@@ -178,11 +166,7 @@ function initializeFriend() {
     friendsFinal = JSON.parse(localStorage.getItem('friends'));
     for (var i = 0; i < friendsFinal.length; i++) {
       var el = friendsFinal[i];
-      list2.appendChild(viewMovedItem(friendsFinal[i],list2,list1));
+      list2.appendChild(viewItemList(friendsFinal[i],list2,list1,friendsFinal,friends,'delete'));
     }
   }
-  // Включаем поиск по людям во втором поле
-  searchInputFinal.addEventListener('input', function() {
-    findFriends(searchInputFinal,friendsFinal,list2,viewMovedItem);
-  })
 }
