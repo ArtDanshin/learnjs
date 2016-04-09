@@ -5,10 +5,6 @@
 3. `git checkout friends-filter`
 3. `npm i`
 
-# Проекта так же доступен по адресу
-
-[http://friends.silverdragoon.ru/](http://friends.silverdragoon.ru/)
-
 # Для сброки проекта выполнить
 ```
 gulp build
@@ -17,4 +13,7 @@ gulp build
 ```
 gulp
 ```
+# Проект так же доступен по адресу:
+
+[http://friends.silverdragoon.ru/](http://friends.silverdragoon.ru/)
 
