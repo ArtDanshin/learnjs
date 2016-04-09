@@ -173,10 +173,3 @@ function initializeFriend() {
     });
   }
 }
-
-function validation(uid, friends) {
-  for (var i = 0; i < friends.length; i++) {
-    if (friends[i].uid === uid) return false
-  }
-  return true
-}
