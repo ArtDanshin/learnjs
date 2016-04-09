@@ -25,36 +25,50 @@ closeButton.addEventListener('click', function() {
   alert('Ваши данные удалены из приложения');
 })
 
-list2.addEventListener('dragover', function(e) {
-  e.preventDefault();
-})
-
-list2.addEventListener('drop', function(e) {
-  var data = JSON.parse(e.dataTransfer.getData('text'));
-  e.stopPropagation();
-  e.preventDefault();
-  list2.appendChild(viewItemList(data,list2,list1,friendsFinal,friends,'delete'));
-  addDataList(data,friendsFinal);
-})
-
 // Активируем в первом поле поиска по людям вк
 searchInputMain.addEventListener('input', function() {
-  findFriends(searchInputMain,friends,friendsFinal,list1,list2,viewItemList,'add')
+  findFriends(searchInputMain,friends,list1,'add')
 })
 
 // Активируем в втором поле поиска по local людям
 searchInputFinal.addEventListener('input', function() {
-  findFriends(searchInputFinal,friendsFinal,friends,list2,list1,viewItemList,'delete');
+  findFriends(searchInputFinal,friendsFinal,list2,'delete');
 })
+
+list1.addEventListener('dragover', function(e) {
+  e.preventDefault();
+})
+
+list1.addEventListener('drop', dragdrop)
+
+list2.addEventListener('dragover', function(e) {
+  e.preventDefault();
+})
+
+list2.addEventListener('drop', dragdrop);
+
+function dragdrop(e) {
+  var viewData = JSON.parse(e.dataTransfer.getData('text'));
+  e.stopPropagation();
+  e.preventDefault();
+
+  if ((viewData.type === 'add') && (validation(viewData.uid,friendsFinal))) {
+    addMode(viewData.uid)
+  }
+  if ((viewData.type === 'delete') && (validation(viewData.uid,friends))) {
+    deleteMode(viewData.uid)
+  }
+};
 
 var VkOperations = new Promise(function(resolve, reject) {
   VK.init({
     apiId: 5395665
   });
-  // Авторизация
+  // Если список с друзьями уже есть, то не авторизуемся
   if (localStorage.getItem("friends") !== null) {
     resolve()
   } else {
+    // В противном случае - авторизуемся
     VK.Auth.login(function(response){
       // Проверяем состояие авторизации
       if(response.session) {
@@ -74,7 +88,7 @@ var VkOperations = new Promise(function(resolve, reject) {
       friendsVk.forEach(function(el) {
         var data = new formData(el.first_name,el.last_name,el.photo_50,el.uid);
         addDataList(data,friends);
-        list1.appendChild(viewItemList(data,list1,list2,friends,friendsFinal,'add'));
+        list1.appendChild(viewItemList(data,'add'));
       })
     })
   })
@@ -82,15 +96,17 @@ var VkOperations = new Promise(function(resolve, reject) {
 
 
 // Функция - шаблон. Вывод друга в список
-function viewItemList(data,listOut,listTo,friendsOut,friendsTo,type) {
+function viewItemList(data,type) {
   var fullName = data.first_name + ' ' + data.last_name;
 
   // Создаем все блоки с данными
   var list__item = document.createElement('div');
       list__item.className = 'list__item';
       list__item.setAttribute('draggable', true);
+      list__item.dataset.uid = data.uid;
   var list__avatar = document.createElement('img');
       list__avatar.className = 'list__avatar';
+      list__avatar.setAttribute('draggable', false);
       list__avatar.setAttribute('src', data.photo_50);
   var list__name = document.createElement('div');
       list__name.className = 'list__name';
@@ -98,21 +114,14 @@ function viewItemList(data,listOut,listTo,friendsOut,friendsTo,type) {
   var list__control = document.createElement('div');
 
   if (type === 'add') {
-    type = 'delete';
     list__control.className = 'list__plus';
-
-    list__item.addEventListener('dragstart', function(e) {
-      e.dataTransfer.setData('text', JSON.stringify(data));
+    list__control.addEventListener('click', function() {
+      addMode(data.uid);
     });
   } else if (type === 'delete'){
-    type = 'add';
     list__control.className = 'list__cross';
-
-    list__item.addEventListener('dragend', function(e) {
-      listTo.appendChild(viewItemList(data,listTo,listOut,friendsTo,friendsOut,type));
-      addDataList(data,friendsTo);
-      listOut.removeChild(list__item);
-      friendsOut = removeDataList(data.uid,friendsOut);
+    list__control.addEventListener('click', function() {
+      deleteMode(data.uid);
     });
   }
 
@@ -120,26 +129,48 @@ function viewItemList(data,listOut,listTo,friendsOut,friendsTo,type) {
   list__item.appendChild(list__name);
   list__item.appendChild(list__control);
 
-  // Обработка добавления в финальный список по нажатию на кнопку
-  list__control.addEventListener('click', function() {
-    listTo.appendChild(viewItemList(data,listTo,listOut,friendsTo,friendsOut,type));
-    addDataList(data,friendsTo);
-    listOut.removeChild(list__item);
-    friendsOut = removeDataList(data.uid,friendsOut);
+  list__item.addEventListener('dragstart', function(e) {
+    var viewData = {
+      uid  : data.uid,
+      type : type
+    }
+    e.dataTransfer.setData('text', JSON.stringify(viewData));
   });
 
   return list__item;
 }
 
+function removeViewItem(uid,list) {
+  var el = list.querySelector('[data-uid="' +  uid + '"]');
+  list.removeChild(el);
+}
+
+function addMode(uid) {
+  var data = searchDataList(uid,friends);
+  addDataList(data[0],friendsFinal);
+  list2.appendChild(viewItemList(data[0],'delete'));
+  friends = removeDataList(uid,friends);
+  removeViewItem(uid,list1);
+}
+
+function deleteMode(uid) {
+  var data = searchDataList(uid,friendsFinal);
+  addDataList(data[0],friends);
+  list1.appendChild(viewItemList(data[0],'add'));
+  friendsFinal = removeDataList(uid,friendsFinal);
+  removeViewItem(uid,list2);
+}
+
+
 // Функция поиска в массиве peoples и вывод в нужный list
-function findFriends(input,friendsOut,friendsTo,listOut,listTo,viewList,type) {
-  listOut.innerHTML = '';
-  friendsOut.forEach(function(el,i) {
+function findFriends(input,friends,list,type) {
+  list.innerHTML = '';
+  friends.forEach(function(el,i) {
     var fullName = el.first_name + ' ' + el.last_name,
         inputText = input.value;
       
     if ( fullName.indexOf(inputText) >= 0 ) {
-      listOut.appendChild(viewList(el,listOut,listTo,friendsOut,friendsTo,type))
+      list.appendChild(viewItemList(el,type))
     };
   })
 }
@@ -164,12 +195,26 @@ function removeDataList(uid, friendsList) {
   })
 }
 
+// Поиск друга в массиве друзей
+function searchDataList(uid, friendsList) {
+  return friendsList.filter(function(friend) {
+    if (friend.uid == uid) return true
+  })
+}
+
 // Загрузка друзей из locacStorage в список
 function initializeFriend() {
   if ( localStorage.getItem('friends')) {
     friendsFinal = JSON.parse(localStorage.getItem('friends'));
     friendsFinal.forEach(function(el) {
-      list2.appendChild(viewItemList(el,list2,list1,friendsFinal,friends,'delete'));
+      list2.appendChild(viewItemList(el,'delete'));
     });
   }
+}
+
+function validation(uid, friends) {
+  friends.forEach(function(el) {
+    if (el.uid === uid) return false
+  })
+  return true
 }
