@@ -52,26 +52,30 @@ var VkOperations = new Promise(function(resolve, reject) {
     apiId: 5395665
   });
   // Авторизация
-  VK.Auth.login(function(response){
-    // Проверяем состояие авторизации
-    if(response.session) {
-      resolve(response)
-    } else {
-      reject(new Error('Авторизация не удалась'))
-    }
-  }, 2+4+8)
+  if (localStorage.getItem("friends") !== null) {
+    resolve()
+  } else {
+    VK.Auth.login(function(response){
+      // Проверяем состояие авторизации
+      if(response.session) {
+        resolve(response)
+      } else {
+        reject(new Error('Авторизация не удалась'))
+      }
+    }, 2+4+8);
+    localStorage.setItem("friends", '');
+  }  
 }).then(function(){
   return new Promise(function(resolve, reject) {
     // Получаем список друзей в случайном порядке с фоткой 50x50
     VK.api('friends.get', {'order' : 'random', 'fields' : 'photo_50'}, function(response) {
       var friendsVk = response.response;
       // Выводим полученные данные в лист
-      for (var i = 0; i < friendsVk.length; i++) {
-        var el   = friendsVk[i],
-            data = new formData(el.first_name,el.last_name,el.photo_50,el.uid);
+      friendsVk.forEach(function(el) {
+        var data = new formData(el.first_name,el.last_name,el.photo_50,el.uid);
         addDataList(data,friends);
         list1.appendChild(viewItemList(data,list1,list2,friends,friendsFinal,'add'));
-      }
+      })
     })
   })
 })
@@ -130,14 +134,14 @@ function viewItemList(data,listOut,listTo,friendsOut,friendsTo,type) {
 // Функция поиска в массиве peoples и вывод в нужный list
 function findFriends(input,friendsOut,friendsTo,listOut,listTo,viewList,type) {
   listOut.innerHTML = '';
-  for (var i = 0; i < friendsOut.length; i++) {
-    var fullName = friendsOut[i].first_name + ' ' + friendsOut[i].last_name,
+  friendsOut.forEach(function(el,i) {
+    var fullName = el.first_name + ' ' + el.last_name,
         inputText = input.value;
       
     if ( fullName.indexOf(inputText) >= 0 ) {
-      listOut.appendChild(viewList(friendsOut[i],listOut,listTo,friendsOut,friendsTo,type))
+      listOut.appendChild(viewList(el,listOut,listTo,friendsOut,friendsTo,type))
     };
-  }
+  })
 }
 
 // Формирование объекта с параметрами друга
@@ -164,9 +168,15 @@ function removeDataList(uid, friendsList) {
 function initializeFriend() {
   if ( localStorage.getItem('friends')) {
     friendsFinal = JSON.parse(localStorage.getItem('friends'));
-    for (var i = 0; i < friendsFinal.length; i++) {
-      var el = friendsFinal[i];
-      list2.appendChild(viewItemList(friendsFinal[i],list2,list1,friendsFinal,friends,'delete'));
-    }
+    friendsFinal.forEach(function(el) {
+      list2.appendChild(viewItemList(el,list2,list1,friendsFinal,friends,'delete'));
+    });
   }
+}
+
+function validation(uid, friends) {
+  for (var i = 0; i < friends.length; i++) {
+    if (friends[i].uid === uid) return false
+  }
+  return true
 }
