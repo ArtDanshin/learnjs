@@ -4,6 +4,9 @@
   "description": "LeardJS Project",
   "repository": "https://github.com/SilverDragoon/learnjs",
   "author": "Artem Danshin",
+  "scripts": {
+    "dev": "gulp && node server.js"
+  },
   "devDependencies": {
     "browser-sync": "^2.9.11",
     "browserify": "^13.0.0",
