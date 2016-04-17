@@ -8,28 +8,8 @@ html(lang="ru-Ru")
 			block title
 		// CSS
 		link(rel="stylesheet" type="text/css" href="main.css")
-		// VK API
-		script(src="http://vk.com/js/api/openapi.js" type="text/javascript")
+		// Yandex API
+		script(src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript")
 	body
-		.wrapper
-			.body-app
-				img.logo(src="img/logo.png")
-				.header 
-					.title-app Выберите друзей
-					.close-app
-				.search-panel
-					.search-panel__block.left
-						input(class="search-panel__input left" type="text" placeholder="Начните вводить имя друга")
-					.search-panel__block.right
-						input(class="search-panel__input right" type="text" placeholder="Название")
-				.friend-lists
-					.friend-lists__list
-						.list__head Ваши друзья
-						.list__items
-					.friend-lists__list
-						.list__head Друзья в списке
-						.list__items
-				.footer
-					button(class="save__button" type="button") Сохранить
-		script(src="libs.js")
+		#body-map
 		script(src="app.js")
