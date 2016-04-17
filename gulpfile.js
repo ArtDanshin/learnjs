@@ -6,7 +6,9 @@ var gulp        = require('gulp'),
     jade        = require('gulp-jade'),
     stylus      = require('gulp-stylus'),
     browserify  = require('browserify'),
-    concat      = require('gulp-concat')
+    source      = require('vinyl-source-stream'),
+    buffer      = require('vinyl-buffer'),
+    concat      = require('gulp-concat');
 
 /* -----  paths ----- */
 
@@ -31,12 +33,6 @@ var paths = {
     js : {
       location   : 'app/js/**/*.js',
       destFile   : 'app.js',
-      destFolder : 'dist/',
-    },
-
-    libjs : {
-      location   : ['node_modules/jquery/dist/jquery.min.js'],
-      destFile   : 'libs.js',
       destFolder : 'dist/',
     },
 
@@ -77,17 +73,11 @@ gulp.task('stylus', function() {
 /* ----- JS ----- */
 
 gulp.task('js', function() {
-  gulp.src(paths.js.location)
-    .pipe(concat(paths.js.destFile))
+  browserify('app/js/main.js')
+    .bundle()
+    .pipe(source(paths.js.destFile))
+    .pipe(buffer())
     .pipe(gulp.dest(paths.js.destFolder));
-});
-
-/* ----- LibsJS ----- */
-
-gulp.task('libjs', function() {
-  gulp.src(paths.libjs.location)
-    .pipe(concat(paths.libjs.destFile))
-    .pipe(gulp.dest(paths.libjs.destFolder));
 });
 
 /* ----- Images ----- */
@@ -134,8 +124,8 @@ gulp.task('watch', function(){
 
 /* ----- Default ----- */
 
-gulp.task('default', ['jade', 'stylus', 'js', 'libjs', 'fonts', 'images', 'sync', 'server:start', 'watch']);
+gulp.task('default', ['jade', 'stylus', 'js', 'fonts', 'images', 'sync', 'server:start', 'watch']);
 
 /* ----- Build Task -----*/
 
-gulp.task('build', ['jade', 'stylus', 'js', 'libjs', 'fonts', 'images']);
+gulp.task('build', ['jade', 'stylus', 'js', 'fonts', 'images']);
