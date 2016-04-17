@@ -12,4 +12,29 @@ html(lang="ru-Ru")
 		script(src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript")
 	body
 		#body-map
+		#feedback
+			.header
+				.header__right
+					.address__icon
+					.address__text Невский пр., 78, Санкт-Петербург, 191025
+				.header__left
+					.cross
+			ul.feeds
+				li.feeds__item
+					.feeds__head
+						.feeds__name svetlana
+						.feeds__address-date Шоколадница 13.12.2015
+					.feeds__text Очень хорошее место
+				li.feeds__item
+					.feeds__head
+						.feeds__name Сергей мелюков
+						.feeds__address-date Красный куб 12.12.2015
+					.feeds__text Ужасное место! Кругом зомби!!!!!
+			.feed
+				.feed__head Ваш отзыв
+				input(class='feed__name' type='text' placeholder='Ваше имя')
+				input(class='feed__place' type='text' placeholder='Укажите место')
+				textarea(class='feed__text' placeholder='Поделитесь впечатлениями')
+				.feed__bottom
+					button.feed__submit Добавить
 		script(src="app.js")
