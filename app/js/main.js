@@ -2,11 +2,48 @@ ymaps.ready(init);
 var myMap;
 
 function init() {
+  var mapCenter = [55.755381, 37.619044],
   myMap = new ymaps.Map('body-map', {
-    center: [55.76, 37.64],
+    center: mapCenter,
     zoom: 11
   });
 
+  var commentsMalloonLayout = ymaps.templateLayoutFactory.createClass(
+    '<div id="feedback">' +
+      '<div class="header">' +
+        '<div class="header__left">' +
+          '<div class="address__icon"></div>' +
+          '<div class="address__text">Невский пр., 78, Санкт-Петербург, 191025</div>' +
+        '</div>' +
+        '<div class="header__right">' +
+          '<div class="cross"></div>' +
+        '</div>' +
+      '</div>' +
+      '<ul class="feeds">' +
+        '{% for comment in properties.comments %}' +
+          '<li class="feeds__item">' +
+            '<div class="feeds__head">' +
+              '<div class="feeds__name">{{ comment.name }}</div>' +
+              '<div class="feeds__address">{{ comment.place }}</div>' +
+              '<div class="feeds__date">{{ comment.date }}</div>' +
+            '</div>' +
+            '<div class="feeds__text">{{ comment.text }}</div>' +
+          '</li>' +
+        '{% endfor %}' +
+      '</ul>' +
+      '<div class="feed">' +
+        '<div class="feed__head">Ваш отзыв</div>' +
+        '<input type="text" placeholder="Ваше имя" class="feed__name">' +
+        '<input type="text" placeholder="Укажите место" class="feed__place">' +
+        '<textarea placeholder="Поделитесь впечатлениями" class="feed__text"></textarea>' +
+        '<div class="feed__bottom clearfix">' +
+          '<button class="feed__submit">Добавить</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>'
+  );
+
+  // Развернутое создание точки
   myGeoObject = new ymaps.GeoObject({
             // Описание геометрии.
             geometry: {
@@ -27,15 +64,29 @@ function init() {
             draggable: true
         });
 
+  // Сокращенное создание точки и добавление на карту
     myMap.geoObjects
         .add(myGeoObject)
         .add(new ymaps.Placemark([55.684758, 37.738521], {
-            balloonContent: 'цвет <strong>воды пляжа бонди</strong>'
+          comments : [{
+              name: 'svetlana',
+              place: 'Шоколадница',
+              date: '13.12.2015',
+              text: 'Очень хорошее место' 
+            }, {
+              name: 'Сергей Мелюков',
+              place: 'Красный куб',
+              date: '12.12.2015',
+              text: 'Ужасное место! Кругом зомби!!!!!'
+            }]
         }, {
             preset: 'islands#icon',
-            iconColor: '#3b5998'
+            iconColor: '#3b5998',
+            balloonLayout: commentsMalloonLayout,
+            hideIconOnBalloonOpen: false,
         }));
 
+    // Создание точки по клику
     myMap.events.add('click', function (e) {
         var coords = e.get('coords');
         var newObj = new ymaps.GeoObject({
@@ -49,6 +100,5 @@ function init() {
               draggable: true
             }
           );
-        myMap.geoObjects.add(newObj);
     });
 }
