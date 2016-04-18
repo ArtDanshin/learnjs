@@ -13,7 +13,7 @@ function init() {
       '<div class="header">' +
         '<div class="header__left">' +
           '<div class="address__icon"></div>' +
-          '<div class="address__text">Невский пр., 78, Санкт-Петербург, 191025</div>' +
+          '<div class="address__text">{{ properties.address }}</div>' +
         '</div>' +
         '<div class="header__right">' +
           '<div class="cross"></div>' +
@@ -40,7 +40,11 @@ function init() {
           '<button class="feed__submit">Добавить</button>' +
         '</div>' +
       '</div>' +
-    '</div>'
+    '</div>', {
+    onCounterClick: function () {
+      
+      }
+    }
   );
 
   // Развернутое создание точки
@@ -63,11 +67,12 @@ function init() {
             // Метку можно перемещать.
             draggable: true
         });
-
+  
   // Сокращенное создание точки и добавление на карту
     myMap.geoObjects
         .add(myGeoObject)
         .add(new ymaps.Placemark([55.684758, 37.738521], {
+          address: [55.684758, 37.738521],
           comments : [{
               name: 'svetlana',
               place: 'Шоколадница',
@@ -88,17 +93,24 @@ function init() {
 
     // Создание точки по клику
     myMap.events.add('click', function (e) {
+      console.log(e);
         var coords = e.get('coords');
         var newObj = new ymaps.GeoObject({
           geometry: {
               type: "Point",
               coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
-            }
-          }, {
-              preset: 'islands#icon',
-              iconColor: '#3b5998',
-              draggable: true
-            }
-          );
+            }, 
+          properties: { 
+            address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
+            comments : []
+          }}, 
+          {
+            preset: 'islands#icon',
+            iconColor: '#3b5998',
+            balloonLayout: commentsMalloonLayout,
+            hideIconOnBalloonOpen: false,
+          });
+        myMap.geoObjects.add(newObj);
+
     });
 }
