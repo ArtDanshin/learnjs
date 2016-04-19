@@ -40,9 +40,28 @@ function init() {
           '<button class="feed__submit">Добавить</button>' +
         '</div>' +
       '</div>' +
-    '</div>', {
-    onCounterClick: function () {
-      
+    '</div>', 
+    {
+      build: function () {
+        commentsMalloonLayout.superclass.build.call(this);
+        var button = this._parentElement.getElementsByClassName('feed__submit')[0],
+            name = this._parentElement.getElementsByClassName('feed__name')[0],
+            place = this._parentElement.getElementsByClassName('feed__place')[0],
+            text = this._parentElement.getElementsByClassName('feed__text')[0],
+            that = this;
+        button.addEventListener('click', function(){
+          that._data.properties._data.comments.push({
+              name: name.value,
+              place: place.value,
+              text: text.value 
+          });
+          console.log(name.value, place.value, text.value);
+          that.rebuild();
+        })
+
+      },
+      clear: function () {
+        commentsMalloonLayout.superclass.clear.call(this);
       }
     }
   );
@@ -93,7 +112,6 @@ function init() {
 
     // Создание точки по клику
     myMap.events.add('click', function (e) {
-      console.log(e);
         var coords = e.get('coords');
         var newObj = new ymaps.GeoObject({
           geometry: {
