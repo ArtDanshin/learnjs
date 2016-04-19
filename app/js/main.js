@@ -48,21 +48,26 @@ function init() {
             name = this._parentElement.getElementsByClassName('feed__name')[0],
             place = this._parentElement.getElementsByClassName('feed__place')[0],
             text = this._parentElement.getElementsByClassName('feed__text')[0],
+            close = this._parentElement.getElementsByClassName('cross')[0],
             that = this;
-        button.addEventListener('click', function(){
+        button.addEventListener('click', function() {
           that._data.properties._data.comments.push({
               name: name.value,
               place: place.value,
               text: text.value 
           });
-          console.log(name.value, place.value, text.value);
           that.rebuild();
         })
-
+        close.addEventListener('click', this.onCloseClick.bind(this));
       },
       clear: function () {
         commentsMalloonLayout.superclass.clear.call(this);
-      }
+      },
+      onCloseClick: function (e) {
+          e.preventDefault();
+
+          this.events.fire('userclose');
+      },
     }
   );
 
