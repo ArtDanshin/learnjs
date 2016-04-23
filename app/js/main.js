@@ -65,7 +65,6 @@ function init() {
       },
       onCloseClick: function (e) {
           e.preventDefault();
-
           this.events.fire('userclose');
       },
     }
@@ -117,23 +116,32 @@ function init() {
 
     // Создание точки по клику
     myMap.events.add('click', function (e) {
-        var coords = e.get('coords');
-        var newObj = new ymaps.GeoObject({
-          geometry: {
-              type: "Point",
-              coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
-            }, 
-          properties: { 
-            address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
-            comments : []
-          }}, 
-          {
-            preset: 'islands#icon',
-            iconColor: '#3b5998',
-            balloonLayout: commentsMalloonLayout,
-            hideIconOnBalloonOpen: false,
-          });
-        myMap.geoObjects.add(newObj);
+        if (!myMap.balloon.isOpen()) {
+          var coords = e.get('coords');
+          var newObj = new ymaps.GeoObject({
+            geometry: {
+                type: "Point",
+                coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
+              }, 
+            properties: { 
+              address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
+              comments : []
+            }}, 
+            {
+              preset: 'islands#icon',
+              iconColor: '#3b5998',
+              balloonLayout: commentsMalloonLayout,
+              hideIconOnBalloonOpen: false,
+            });
+          myMap.geoObjects.add(newObj);
+          newObj.balloon.open(coords, { 
+              address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
+              comments : []
+            });
+          }
+          else {
+              myMap.balloon.close();
+          }
 
     });
 }
