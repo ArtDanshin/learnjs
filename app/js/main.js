@@ -51,10 +51,24 @@ function init() {
             close = this._parentElement.getElementsByClassName('cross')[0],
             that = this;
         button.addEventListener('click', function() {
+          var now = new Date();
+          var dd = now.getDate();
+          var mm = now.getMonth()+1; //January is 0!
+          var yyyy = now.getFullYear();
+
+          if(dd<10){
+              dd='0'+dd
+          } 
+          if(mm<10){
+              mm='0'+mm
+          } 
+          now = dd+'.'+mm+'.'+yyyy;
+
           that._data.properties._data.comments.push({
               name: name.value,
               place: place.value,
-              text: text.value 
+              text: text.value,
+              date: now 
           });
           that.rebuild();
         })
@@ -69,31 +83,9 @@ function init() {
       },
     }
   );
-
-  // Развернутое создание точки
-  myGeoObject = new ymaps.GeoObject({
-            // Описание геометрии.
-            geometry: {
-                type: "Point",
-                coordinates: [55.8, 37.8]
-            },
-            // Свойства.
-            properties: {
-                // Контент метки.
-                iconContent: 'Я тащусь',
-                hintContent: 'Ну давай уже тащи'
-            }
-        }, {
-            // Опции.
-            // Иконка метки будет растягиваться под размер ее содержимого.
-            preset: 'islands#blackStretchyIcon',
-            // Метку можно перемещать.
-            draggable: true
-        });
   
   // Сокращенное создание точки и добавление на карту
     myMap.geoObjects
-        .add(myGeoObject)
         .add(new ymaps.Placemark([55.684758, 37.738521], {
           address: [55.684758, 37.738521],
           comments : [{
@@ -125,7 +117,6 @@ function init() {
               coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
             }, 
           properties: { 
-            address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
             comments : []
           }}, 
           {
