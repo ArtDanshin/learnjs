@@ -116,32 +116,44 @@ function init() {
 
     // Создание точки по клику
     myMap.events.add('click', function (e) {
-        if (!myMap.balloon.isOpen()) {
-          var coords = e.get('coords');
-          var newObj = new ymaps.GeoObject({
-            geometry: {
-                type: "Point",
-                coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
-              }, 
-            properties: { 
-              address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
-              comments : []
-            }}, 
-            {
-              preset: 'islands#icon',
-              iconColor: '#3b5998',
-              balloonLayout: commentsMalloonLayout,
-              hideIconOnBalloonOpen: false,
-            });
-          myMap.geoObjects.add(newObj);
-          newObj.balloon.open(coords, { 
-              address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
-              comments : []
-            });
-          }
-          else {
-              myMap.balloon.close();
-          }
-
+      if (!myMap.balloon.isOpen()) {
+        var coords = e.get('coords');
+        getAddress(coords);
+        var newObj = new ymaps.GeoObject({
+          geometry: {
+              type: "Point",
+              coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
+            }, 
+          properties: { 
+            address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
+            comments : []
+          }}, 
+          {
+            preset: 'islands#icon',
+            iconColor: '#3b5998',
+            balloonLayout: commentsMalloonLayout,
+            hideIconOnBalloonOpen: false,
+          });
+        getAddress(coords,newObj);
+        myMap.geoObjects.add(newObj);
+        newObj.balloon.open(coords, { 
+            address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
+            comments : []
+          });
+        }
+        else {
+            myMap.balloon.close();
+        }
     });
+
+    function getAddress(coords,point) {
+        ymaps.geocode(coords).then(function (res) {
+            var firstGeoObject = res.geoObjects.get(0);
+
+            point.properties
+                .set({
+                    address: firstGeoObject.properties.get('text')
+                });
+        });
+    }
 }
