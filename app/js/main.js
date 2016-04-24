@@ -52,18 +52,7 @@ function init() {
             close = this._parentElement.getElementsByClassName('cross')[0],
             that = this;
         button.addEventListener('click', function(e) {
-          var now = new Date();
-          var dd = now.getDate();
-          var mm = now.getMonth()+1; //January is 0!
-          var yyyy = now.getFullYear();
-
-          if(dd<10){
-              dd='0'+dd
-          } 
-          if(mm<10){
-              mm='0'+mm
-          } 
-          now = dd+'.'+mm+'.'+yyyy;
+          var now = formatDate(new Date());
 
           var comment = {
             coords: that._data.properties._data.coords,
@@ -90,129 +79,92 @@ function init() {
       },
     }
   );
-  
-  // Сокращенное создание точки и добавление на карту
-    myMap.geoObjects
-        .add(new ymaps.Placemark([55.684758, 37.738521], {
-          address: [55.684758, 37.738521],
-          comments : [{
-              name: 'svetlana',
-              place: 'Шоколадница',
-              date: '13.12.2015',
-              text: 'Очень хорошее место' 
-            }, {
-              name: 'Сергей Мелюков',
-              place: 'Красный куб',
-              date: '12.12.2015',
-              text: 'Ужасное место! Кругом зомби!!!!!'
-            }]
-        }, {
-            preset: 'islands#icon',
-            iconColor: '#3b5998',
-            balloonLayout: commentsMalloonLayout,
-            hideIconOnBalloonOpen: false,
-        }));
 
-    // Создание точки по клику
-    myMap.events.add('click', function (e) {
-      if (!myMap.balloon.isOpen()) {
-        var coords = e.get('coords');
-        getAddress(coords);
-        var newObj = new ymaps.GeoObject({
-          geometry: {
-              type: "Point",
-              coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
-            }, 
-          properties: { 
-            coords: { x: coords[0].toPrecision(6), 
-                      y: coords[1].toPrecision(6) },
-            comments: []
-          }}, 
-          {
-            preset: 'islands#icon',
-            iconColor: '#3b5998',
-            balloonLayout: commentsMalloonLayout,
-            hideIconOnBalloonOpen: false,
-          });
-        getAddress(coords,newObj);
-        myMap.geoObjects.add(newObj);
-        newObj.balloon.open(coords, { 
-            address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
-            comments : []
-          });
+  myMap.events.add('click', function (e) {
+    if (!myMap.balloon.isOpen()) {
+      var coords = e.get('coords');
+      getAddress(coords);
+      var newObj = new ymaps.GeoObject({
+        geometry: {
+            type: "Point",
+            coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
+        }, 
+        properties: { 
+          coords: { 
+            x: coords[0].toPrecision(6), 
+            y: coords[1].toPrecision(6)
+          },
+          comments: []
         }
-        else {
-            myMap.balloon.close();
-        }
-    });
-
-    function getAddress(coords,point) {
-        ymaps.geocode(coords).then(function (res) {
-            var firstGeoObject = res.geoObjects.get(0);
-
-            point.properties
-                .set({
-                    address: firstGeoObject.properties.get('text')
-                });
-        });
-    }
-
-    function getCoords(place,point) {
-      console.log(place);
-        ymaps.geocode(place).then(function (res) {
-            var firstGeoObject = res.geoObjects.get(0);
-
-              point.properties
-                .set({
-                    coords: firstGeoObject.geometry.getCoordinates()
-                });
-              console.log(point);
-        });
-    }
-
-    function downloadAll() {
-      var objTo = {
-        op: 'all'
-      }
-
-      var p = new Promise(function(resolve) {
-        var xhr = new XMLHttpRequest();
-
-        xhr.open('POST', 'http://localhost:3000/', true);
-        xhr.onload = function() { 
-          resolve(xhr.response);
-        }
-        xhr.send( JSON.stringify(objTo) );
-      }).then(function(value) {
-        var all = JSON.parse(value);
-        var allPlace = Object.keys(all);
-
-        allPlace.forEach(function(el) {
-
-          var placeComments = all[el];
-
-          ymaps.geocode(el).then(function (res) {
-            var firstGeoObject = res.geoObjects.get(0),
-                coords = firstGeoObject.geometry.getCoordinates();
-              
-            myMap.geoObjects
-              .add(new ymaps.Placemark(coords, {
-                address: el,
-                coords: { x: coords[0],
-                          y: coords[1] },
-                comments : placeComments
-              }, {
-                  preset: 'islands#icon',
-                  iconColor: '#3b5998',
-                  balloonLayout: commentsMalloonLayout,
-                  hideIconOnBalloonOpen: false,
-              }));
-          });
-
-        })
+      }, {
+        preset: 'islands#icon',
+        iconColor: '#3b5998',
+        balloonLayout: commentsMalloonLayout,
+        hideIconOnBalloonOpen: false,
       });
-
+      getAddress(coords,newObj);
+      myMap.geoObjects.add(newObj);
+      newObj.balloon.open(coords, { 
+        address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
+        comments : []
+      });
+    } else {
+      myMap.balloon.close();
     }
+  });
+
+  function getAddress(coords,point) {
+    ymaps.geocode(coords).then(function (res) {
+      var firstGeoObject = res.geoObjects.get(0);
+
+      point.properties
+        .set({
+          address: firstGeoObject.properties.get('text')
+        });
+    });
+  }
+
+  function downloadAll() {
+    var objTo = {
+      op: 'all'
+    }
+
+    var p = new Promise(function(resolve) {
+      var xhr = new XMLHttpRequest();
+
+      xhr.open('POST', 'http://localhost:3000/', true);
+      xhr.onload = function() { 
+        resolve(xhr.response);
+      }
+      xhr.send( JSON.stringify(objTo) );
+    }).then(function(value) {
+      var all = JSON.parse(value);
+      var allPlace = Object.keys(all);
+
+      allPlace.forEach(function(el) {
+        var placeComments = all[el];
+
+        ymaps.geocode(el).then(function (res) {
+          var firstGeoObject = res.geoObjects.get(0),
+              coords = firstGeoObject.geometry.getCoordinates();
+            
+          myMap.geoObjects.add(
+            new ymaps.Placemark(coords, {
+              address: el,
+              coords: { x: coords[0],
+                        y: coords[1] },
+              comments : placeComments
+            }, {
+                preset: 'islands#icon',
+                iconColor: '#3b5998',
+                balloonLayout: commentsMalloonLayout,
+                hideIconOnBalloonOpen: false,
+            })
+          );
+        });
+      })
+    });
+  }
 }
 
 function uploadTo(obj) {
@@ -220,9 +172,23 @@ function uploadTo(obj) {
     op: 'add',
     review: obj
   }
-  console.log(objTo);
+
   var xhr = new XMLHttpRequest();
   xhr.open('POST', 'http://localhost:3000/', true);
 
   xhr.send( JSON.stringify(objTo) );
+}
+
+function formatDate(date) {
+  var dd = date.getDate();
+  var mm = date.getMonth()+1; //January is 0!
+  var yyyy = date.getFullYear();
+
+  if(dd<10){
+      dd='0'+dd
+  } 
+  if(mm<10){
+      mm='0'+mm
+  } 
+  return dd+'.'+mm+'.'+yyyy;
 }

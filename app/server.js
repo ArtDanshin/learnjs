@@ -30,10 +30,6 @@ var assert = require('assert'),
                     assert.equal(typeof parsed.review.text, 'string');
                     assert.equal(parsed.review.text.trim().length > 0, true);
 
-                    var date = new Date();
-
-                    parsed.review.date = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds());
-
                     if (!storage[parsed.review.address]) {
                         storage[parsed.review.address] = [];
                     }
