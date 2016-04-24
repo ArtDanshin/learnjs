@@ -7,6 +7,7 @@ function init() {
     center: mapCenter,
     zoom: 11
   });
+  downloadAll();
 
   var commentsMalloonLayout = ymaps.templateLayoutFactory.createClass(
     '<div id="feedback">' +
@@ -155,6 +156,63 @@ function init() {
                 });
         });
     }
+
+    function getCoords(place,point) {
+      console.log(place);
+        ymaps.geocode(place).then(function (res) {
+            var firstGeoObject = res.geoObjects.get(0);
+
+              point.properties
+                .set({
+                    coords: firstGeoObject.geometry.getCoordinates()
+                });
+              console.log(point);
+        });
+    }
+
+    function downloadAll() {
+      var objTo = {
+        op: 'all'
+      }
+
+      var p = new Promise(function(resolve) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('POST', 'http://localhost:3000/', true);
+        xhr.onload = function() { 
+          resolve(xhr.response);
+        }
+        xhr.send( JSON.stringify(objTo) );
+      }).then(function(value) {
+        var all = JSON.parse(value);
+        var allPlace = Object.keys(all);
+
+        allPlace.forEach(function(el) {
+
+          var placeComments = all[el];
+
+          ymaps.geocode(el).then(function (res) {
+            var firstGeoObject = res.geoObjects.get(0),
+                coords = firstGeoObject.geometry.getCoordinates();
+              
+            myMap.geoObjects
+              .add(new ymaps.Placemark(coords, {
+                address: el,
+                coords: { x: coords[0],
+                          y: coords[1] },
+                comments : placeComments
+              }, {
+                  preset: 'islands#icon',
+                  iconColor: '#3b5998',
+                  balloonLayout: commentsMalloonLayout,
+                  hideIconOnBalloonOpen: false,
+              }));
+          });
+
+        })
+      });
+
+    }
 }
 
 function uploadTo(obj) {
@@ -168,23 +226,3 @@ function uploadTo(obj) {
 
   xhr.send( JSON.stringify(objTo) );
 }
-
-function downloadAll() {
-  var objTo = {
-    op: 'all'
-  }
-
-  var p = new Promise(function(resolve) {
-    var xhr = new XMLHttpRequest();
-
-    xhr.open('POST', 'http://localhost:3000/', true);
-    xhr.onload = function() { 
-      resolve(xhr.response);
-    }
-    xhr.send( JSON.stringify(objTo) );
-  }).then(function(value) {
-    return JSON.parse(value);
-  })
-}
-
-console.log(downloadAll());
