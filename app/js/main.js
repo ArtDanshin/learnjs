@@ -168,3 +168,23 @@ function uploadTo(obj) {
 
   xhr.send( JSON.stringify(objTo) );
 }
+
+function downloadAll() {
+  var objTo = {
+    op: 'all'
+  }
+
+  var p = new Promise(function(resolve) {
+    var xhr = new XMLHttpRequest();
+
+    xhr.open('POST', 'http://localhost:3000/', true);
+    xhr.onload = function() { 
+      resolve(xhr.response);
+    }
+    xhr.send( JSON.stringify(objTo) );
+  }).then(function(value) {
+    return JSON.parse(value);
+  })
+}
+
+console.log(downloadAll());
