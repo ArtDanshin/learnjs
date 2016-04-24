@@ -50,7 +50,7 @@ function init() {
             text = this._parentElement.getElementsByClassName('feed__text')[0],
             close = this._parentElement.getElementsByClassName('cross')[0],
             that = this;
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
           var now = new Date();
           var dd = now.getDate();
           var mm = now.getMonth()+1; //January is 0!
@@ -64,13 +64,19 @@ function init() {
           } 
           now = dd+'.'+mm+'.'+yyyy;
 
-          that._data.properties._data.comments.push({
-              name: name.value,
-              place: place.value,
-              text: text.value,
-              date: now 
-          });
+          var comment = {
+            coords: that._data.properties._data.coords,
+            address: that._data.properties._data.address,
+            name: name.value,
+            place: place.value,
+            text: text.value,
+            date: now
+          }; 
+
+          that._data.properties._data.comments.push(comment);
+          uploadTo(comment);
           that.rebuild();
+
         })
         close.addEventListener('click', this.onCloseClick.bind(this));
       },
@@ -117,7 +123,9 @@ function init() {
               coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
             }, 
           properties: { 
-            comments : []
+            coords: { x: coords[0].toPrecision(6), 
+                      y: coords[1].toPrecision(6) },
+            comments: []
           }}, 
           {
             preset: 'islands#icon',
@@ -147,4 +155,16 @@ function init() {
                 });
         });
     }
+}
+
+function uploadTo(obj) {
+  var objTo = {
+    op: 'add',
+    review: obj
+  }
+  console.log(objTo);
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'http://localhost:3000/', true);
+
+  xhr.send( JSON.stringify(objTo) );
 }
