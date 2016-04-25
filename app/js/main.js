@@ -75,6 +75,10 @@ function init() {
       },
       onCloseClick: function (e) {
           e.preventDefault();
+          var len = this._data.properties._data.comments;
+          if (!len[0]) {
+            clusterer.remove(this._data.geoObject);
+          };
           this.events.fire('userclose');
       },
     }
@@ -105,6 +109,10 @@ function init() {
     clusterBalloonPagerSize: 5
   });
 
+  clusterer.events.add('dblclick', function (e) {
+    console.log(e.get('target'));
+    });
+
   myMap.events.add('click', function (e) {
     if (!myMap.balloon.isOpen()) {
       var coords = e.get('coords');
@@ -134,6 +142,9 @@ function init() {
         comments : []
       });
     } else {
+      if(!myMap.balloon._balloon._data.geoObject.properties._data.comments[0]) {
+        clusterer.remove(myMap.balloon._balloon._data.geoObject);
+      };
       myMap.balloon.close();
     }
   });
