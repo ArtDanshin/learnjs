@@ -79,29 +79,30 @@ function init() {
       },
     }
   );
+  
+  var customItemContentLayout = ymaps.templateLayoutFactory.createClass(
+    '<h2 class=cluster__title>{{ properties.address|raw }}</h2>' +
+    '<ul class="cluster__list">' +
+      '{% for comment in properties.comments %}' +
+        '<li class="cluster__item">' +
+          '<div class="cluster__item-head">' +
+            '<div class="cluster__item-name">{{ comment.name }}</div>' +
+            '<div class="cluster__item-address">{{ comment.place }}</div>' +
+            '<div class="cluster__item-date">{{ comment.date }}</div>' +
+          '</div>' +
+          '<div class="cluster__item-text">{{ comment.text }}</div>' +
+        '</li>' +
+      '{% endfor %}' +
+    '</ul>'
+  );
 
   var clusterer = new ymaps.Clusterer({
     clusterDisableClickZoom: true,
     clusterOpenBalloonOnClick: true,
-    // Устанавливаем стандартный макет балуна кластера "Карусель".
     clusterBalloonContentLayout: 'cluster#balloonCarousel',
-    // Устанавливаем собственный макет.
-    // clusterBalloonItemContentLayout: customItemContentLayout,
-    // Устанавливаем режим открытия балуна. 
-    // В данном примере балун никогда не будет открываться в режиме панели.
+    clusterBalloonItemContentLayout: customItemContentLayout,
     clusterBalloonPanelMaxMapArea: 0,
-    // Устанавливаем размеры макета контента балуна (в пикселях).
-    clusterBalloonContentLayoutWidth: 200,
-    clusterBalloonContentLayoutHeight: 130,
-    // Устанавливаем максимальное количество элементов в нижней панели на одной странице
     clusterBalloonPagerSize: 5
-    // Настройка внешего вида нижней панели.
-    // Режим marker рекомендуется использовать с небольшим количеством элементов.
-    // clusterBalloonPagerType: 'marker',
-    // Можно отключить зацикливание списка при навигации при помощи боковых стрелок.
-    // clusterBalloonCycling: false,
-    // Можно отключить отображение меню навигации.
-    // clusterBalloonPagerVisible: false
   });
 
   myMap.events.add('click', function (e) {
