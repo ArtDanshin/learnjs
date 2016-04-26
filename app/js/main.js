@@ -113,10 +113,6 @@ function init() {
     geoObjectHideIconOnBalloonOpen: false
   });
 
-  clusterer.events.add('dblclick', function (e) {
-    console.log(e.get('target'));
-    });
-
   myMap.events.add('click', function (e) {
     if (!myMap.balloon.isOpen()) {
       var coords = e.get('coords');
