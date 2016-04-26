@@ -5,7 +5,8 @@ function init() {
   var mapCenter = [55.755381, 37.619044],
   myMap = new ymaps.Map('body-map', {
     center: mapCenter,
-    zoom: 15
+    zoom: 15,
+    controls: ['zoomControl']
   });
   downloadAll();
 
@@ -106,7 +107,10 @@ function init() {
     clusterBalloonContentLayout: 'cluster#balloonCarousel',
     clusterBalloonItemContentLayout: customItemContentLayout,
     clusterBalloonPanelMaxMapArea: 0,
-    clusterBalloonPagerSize: 5
+    clusterBalloonPagerSize: 5,
+    preset: 'islands#invertedDarkOrangeClusterIcons',
+    clusterHideIconOnBalloonOpen: false,
+    geoObjectHideIconOnBalloonOpen: false
   });
 
   clusterer.events.add('dblclick', function (e) {
@@ -130,20 +134,12 @@ function init() {
           comments: []
         }
       }, {
-              preset: 'islands#icon',
-              iconColor: '#3b5998',
-              balloonLayout: commentsMalloonLayout,
-              hideIconOnBalloonOpen: false,
-              // Опции.
-              // Необходимо указать данный тип макета.
-              iconLayout: 'default#image',
-              // Своё изображение иконки метки.
-              iconImageHref: 'img/picker-map.png',
-              // Размеры метки.
-              iconImageSize: [44, 66],
-              // Смещение левого верхнего угла иконки относительно
-              // её "ножки" (точки привязки).
-              iconImageOffset: [-22, -66]
+        balloonLayout: commentsMalloonLayout,
+        hideIconOnBalloonOpen: false,
+        iconLayout: 'default#image',
+        iconImageHref: 'img/picker-map.png',
+        iconImageSize: [44, 66],
+        iconImageOffset: [-22, -66]
       });
       getAddress(coords,newObj);
       clusterer.add(newObj);
@@ -201,20 +197,12 @@ function init() {
                         y: coords[1] },
               comments : placeComments
             }, {
-              preset: 'islands#icon',
-              iconColor: '#3b5998',
               balloonLayout: commentsMalloonLayout,
               hideIconOnBalloonOpen: false,
-              // Опции.
-              // Необходимо указать данный тип макета.
               iconLayout: 'default#image',
-              // Своё изображение иконки метки.
               iconImageHref: 'img/picker-map.png',
-              // Размеры метки.
               iconImageSize: [44, 66],
-              // Смещение левого верхнего угла иконки относительно
-              // её "ножки" (точки привязки).
-              iconImageOffset: [-3, -42]
+              iconImageOffset: [-22, -66]
             })
           );
         });
