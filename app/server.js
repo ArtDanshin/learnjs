@@ -60,8 +60,6 @@ var assert = require('assert'),
         });
     });
 
-server.listen(3000, 'localhost');
-
 function parsePost(req) {
     return new Promise(function(resolve) {
         var data = '';
