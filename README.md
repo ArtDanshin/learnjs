@@ -9,11 +9,9 @@
 ```
 gulp build
 ```
-# Для разработки с LiveReload сервером
+# Для разработки с LiveReload и NodeJS сервером
 ```
 gulp
 ```
-# Проект так же доступен по адресу:
-
-[http://friends.silverdragoon.ru/](http://friends.silverdragoon.ru/)
-
+Сайт запускается на `http://localhost:9000` 
+Сервер запускается на `http://localhost:3000`
