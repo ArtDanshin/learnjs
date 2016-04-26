@@ -1,3 +1,9 @@
+# Навигация по веткам
+
+Friend-Filter -> [https://github.com/SilverDragoon/learnjs/tree/friends-filter](https://github.com/SilverDragoon/learnjs/tree/friends-filter)
+
+GeoLocation -> [https://github.com/SilverDragoon/learnjs/tree/geolocation](https://github.com/SilverDragoon/learnjs/tree/geolocation)
+
 # Как установить
 
 1. `git clone https://github.com/SilverDragoon/learnjs.git`
@@ -14,4 +20,5 @@ gulp build
 gulp
 ```
 Сайт запускается на `http://localhost:9000` 
+
 Сервер запускается на `http://localhost:3000`
