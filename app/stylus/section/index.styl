@@ -15,15 +15,20 @@ body
   border-radius 10px
   background-color white
 
-.header 
+.header
+  display flex
+  align-items center 
+  justify-content space-between 
   width 100%
   height 44px
   background-color #ff8663
   border-radius 10px 10px 0 0
   box-sizing border-box
-  padding 10px
+  padding 0 15px
   &__left
     float left
+    display flex
+    align-items center
   &__right
     float right
   
@@ -32,13 +37,17 @@ body
     display inline-block
     width 8px
     height 14px
+    margin-right 7px
     background url('img/picker.png') no-repeat 0 0
   &__text
     display inline-block
-    vertical-align middle
+    width 310px
     font-family FiraSans_Light
     font-size 12px
     color white
+    text-overflow ellipsis
+    white-space nowrap
+    overflow hidden
 
 .cross
   width 14px
@@ -47,21 +56,30 @@ body
   cursor pointer
 
 .feeds
-  width 100%
+  box-sizing border-box
+  width calc(100% - 30px)
+  margin 12px 15px
+  margin-bottom 7px
   padding 0
-  height 150px
+  height 145px
+  border-bottom 1px rgba(0,0,0,.15) solid
   overflow auto
   &__item
     list-style none
+    margin-bottom 15px
+  &__head
+    margin-bottom 2px
   &__name 
     display inline-block
+    margin-right 5px
     font-family FiraSans_Medium
     font-size 16px
     color #4f4f4f
   &__address
     display inline-block
+    margin-right 5px
     font-family FiraSans_Regular
-    font-size 16px
+    font-size 15px
     color #4f4f4f
   &__date
     display inline-block
@@ -75,21 +93,38 @@ body
 
 .feed
   width 100%
-  padding 0 20px
+  padding 0 15px
   box-sizing border-box
   margin-bottom 10px
   &__head
     font-family FiraSans_Medium
     font-size 16px
     color #ff8663
+    margin-bottom 10px
+    text-transform uppercase
   &__name
   &__place
   &__text
     display block
+    box-sizing border-box
     width 100%
-    margin-bottom 5px
-    border-radius 10px
-    border 1px grey solid
+    height 35px
+    margin-bottom 12px
+    padding 0 12px
+    border-radius 20px
+    border 1px rgba(0,0,0,.15) solid
+    font-family FiraSans_Light
+    font-size 15px
+    color #9f9f9f
+  &__textarea
+    display block
+    box-sizing border-box
+    width 100%
+    height 130px
+    margin-bottom 15px
+    padding 5px 12px
+    border-radius 20px
+    border 1px rgba(0,0,0,.15) solid
     font-family FiraSans_Light
     font-size 15px
     color #9f9f9f
@@ -97,7 +132,7 @@ body
     width 100%
   &__submit
     float right
-    padding 5px 10px
+    padding 7px 17px
     border 0
     border-radius 10px
     background-color #ff8663

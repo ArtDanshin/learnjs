@@ -7,7 +7,6 @@ function init() {
     center: mapCenter,
     zoom: 11
   });
-  downloadAll();
 
   var commentsMalloonLayout = ymaps.templateLayoutFactory.createClass(
     '<div id="feedback">' +
@@ -36,7 +35,7 @@ function init() {
         '<div class="feed__head">Ваш отзыв</div>' +
         '<input type="text" placeholder="Ваше имя" class="feed__name">' +
         '<input type="text" placeholder="Укажите место" class="feed__place">' +
-        '<textarea placeholder="Поделитесь впечатлениями" class="feed__text"></textarea>' +
+        '<textarea placeholder="Поделитесь впечатлениями" class="feed__textarea"></textarea>' +
         '<div class="feed__bottom clearfix">' +
           '<button class="feed__submit">Добавить</button>' +
         '</div>' +
@@ -52,7 +51,18 @@ function init() {
             close = this._parentElement.getElementsByClassName('cross')[0],
             that = this;
         button.addEventListener('click', function(e) {
-          var now = formatDate(new Date());
+          var now = new Date();
+          var dd = now.getDate();
+          var mm = now.getMonth()+1; //January is 0!
+          var yyyy = now.getFullYear();
+
+          if(dd<10){
+              dd='0'+dd
+          } 
+          if(mm<10){
+              mm='0'+mm
+          } 
+          now = dd+'.'+mm+'.'+yyyy;
 
           var comment = {
             coords: that._data.properties._data.coords,
@@ -75,133 +85,105 @@ function init() {
       },
       onCloseClick: function (e) {
           e.preventDefault();
-          var len = this._data.properties._data.comments;
-          if (!len[0]) {
-            clusterer.remove(this._data.geoObject);
-          };
           this.events.fire('userclose');
       },
     }
   );
   
-  var customItemContentLayout = ymaps.templateLayoutFactory.createClass(
-    '<h2 class=cluster__title>{{ properties.address|raw }}</h2>' +
-    '<ul class="cluster__list">' +
-      '{% for comment in properties.comments %}' +
-        '<li class="cluster__item">' +
-          '<div class="cluster__item-head">' +
-            '<div class="cluster__item-name">{{ comment.name }}</div>' +
-            '<div class="cluster__item-address">{{ comment.place }}</div>' +
-            '<div class="cluster__item-date">{{ comment.date }}</div>' +
-          '</div>' +
-          '<div class="cluster__item-text">{{ comment.text }}</div>' +
-        '</li>' +
-      '{% endfor %}' +
-    '</ul>'
-  );
-
-  var clusterer = new ymaps.Clusterer({
-    clusterDisableClickZoom: true,
-    clusterOpenBalloonOnClick: true,
-    clusterBalloonContentLayout: 'cluster#balloonCarousel',
-    clusterBalloonItemContentLayout: customItemContentLayout,
-    clusterBalloonPanelMaxMapArea: 0,
-    clusterBalloonPagerSize: 5
-  });
-
-  clusterer.events.add('dblclick', function (e) {
-    console.log(e.get('target'));
-    });
-
-  myMap.events.add('click', function (e) {
-    if (!myMap.balloon.isOpen()) {
-      var coords = e.get('coords');
-      getAddress(coords);
-      var newObj = new ymaps.GeoObject({
-        geometry: {
-            type: "Point",
-            coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
-        }, 
-        properties: { 
-          coords: { 
-            x: coords[0].toPrecision(6), 
-            y: coords[1].toPrecision(6)
-          },
-          comments: []
-        }
-      }, {
-        preset: 'islands#icon',
-        iconColor: '#3b5998',
-        balloonLayout: commentsMalloonLayout,
-        hideIconOnBalloonOpen: false,
-      });
-      getAddress(coords,newObj);
-      clusterer.add(newObj);
-      newObj.balloon.open(coords, { 
-        address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
-        comments : []
-      });
-    } else {
-      if(!myMap.balloon._balloon._data.geoObject.properties._data.comments[0]) {
-        clusterer.remove(myMap.balloon._balloon._data.geoObject);
-      };
-      myMap.balloon.close();
-    }
-  });
-
-  function getAddress(coords,point) {
-    ymaps.geocode(coords).then(function (res) {
-      var firstGeoObject = res.geoObjects.get(0);
-
-      point.properties
-        .set({
-          address: firstGeoObject.properties.get('text')
-        });
-    });
-  }
-
-  function downloadAll() {
-    var objTo = {
-      op: 'all'
-    }
-
-    var p = new Promise(function(resolve) {
-      var xhr = new XMLHttpRequest();
-
-      xhr.open('POST', 'http://localhost:3000/', true);
-      xhr.onload = function() { 
-        resolve(xhr.response);
-      }
-      xhr.send( JSON.stringify(objTo) );
-    }).then(function(value) {
-      var all = JSON.parse(value);
-      var allPlace = Object.keys(all);
-
-      allPlace.forEach(function(el) {
-        var placeComments = all[el];
-
-        ymaps.geocode(el).then(function (res) {
-          var firstGeoObject = res.geoObjects.get(0),
-              coords = firstGeoObject.geometry.getCoordinates();
-            
-          clusterer.add(
-            new ymaps.Placemark(coords, {
-              address: el,
-              coords: { x: coords[0],
-                        y: coords[1] },
-              comments : placeComments
+  // Сокращенное создание точки и добавление на карту
+    myMap.geoObjects
+        .add(new ymaps.Placemark([55.684758, 37.738521], {
+          address: [55.684758, 37.738521],
+          comments : [{
+              name: 'svetlana',
+              place: 'Шоколадница',
+              date: '13.12.2015',
+              text: 'Очень хорошее место' 
             }, {
-                preset: 'islands#icon',
-                iconColor: '#3b5998',
-                balloonLayout: commentsMalloonLayout,
-                hideIconOnBalloonOpen: false,
-            })
-          );
-        });
-      })
-      myMap.geoObjects.add(clusterer);
+              name: 'Сергей Мелюков',
+              place: 'Красный куб',
+              date: '12.12.2015',
+              text: 'Ужасное место! Кругом зомби!!!!!'
+            }]
+        }, {
+            preset: 'islands#icon',
+            iconColor: '#3b5998',
+            balloonLayout: commentsMalloonLayout,
+            hideIconOnBalloonOpen: false,
+        }));
+
+    // Создание точки по клику
+    myMap.events.add('click', function (e) {
+      if (!myMap.balloon.isOpen()) {
+        var coords = e.get('coords');
+        getAddress(coords);
+        var newObj = new ymaps.GeoObject({
+          geometry: {
+              type: "Point",
+              coordinates: [coords[0].toPrecision(6), coords[1].toPrecision(6)]
+            }, 
+          properties: { 
+            coords: { x: coords[0].toPrecision(6), 
+                      y: coords[1].toPrecision(6) },
+            comments: []
+          }}, 
+          {
+            preset: 'islands#icon',
+            iconColor: '#3b5998',
+            balloonLayout: commentsMalloonLayout,
+            hideIconOnBalloonOpen: false,
+          });
+        getAddress(coords,newObj);
+        myMap.geoObjects.add(newObj);
+        newObj.balloon.open(coords, { 
+            address: [coords[0].toPrecision(6), coords[1].toPrecision(6)],
+            comments : []
+          });
+        }
+        else {
+            myMap.balloon.close();
+        }
     });
-  }
+
+    function getAddress(coords,point) {
+        ymaps.geocode(coords).then(function (res) {
+            var firstGeoObject = res.geoObjects.get(0);
+
+            point.properties
+                .set({
+                    address: firstGeoObject.properties.get('text')
+                });
+        });
+    };
+        
+    function getCords(address,point) {
+        ymaps.geocode(coords).then(function (res) {
+            var firstGeoObject = res.geoObjects.get(0);
+
+            point.properties
+                .set({
+                    address: firstGeoObject.properties.get('text')
+                });
+        });
+    };
+
+    function downloadAll() {
+      var objTo = {
+        op: 'all'
+      }
+
+      var p = new Promise(function(resolve) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('POST', 'http://localhost:3000/', true);
+        xhr.onload = function() { 
+          resolve(xhr.response);
+        }
+        xhr.send( JSON.stringify(objTo) );
+      }).then(function(value) {
+        return JSON.parse(value);
+      })
+    }
 }
 
 function uploadTo(obj) {
@@ -209,23 +191,9 @@ function uploadTo(obj) {
     op: 'add',
     review: obj
   }
-
+  console.log(objTo);
   var xhr = new XMLHttpRequest();
   xhr.open('POST', 'http://localhost:3000/', true);
 
   xhr.send( JSON.stringify(objTo) );
-}
-
-function formatDate(date) {
-  var dd = date.getDate();
-  var mm = date.getMonth()+1; //January is 0!
-  var yyyy = date.getFullYear();
-
-  if(dd<10){
-      dd='0'+dd
-  } 
-  if(mm<10){
-      mm='0'+mm
-  } 
-  return dd+'.'+mm+'.'+yyyy;
 }
